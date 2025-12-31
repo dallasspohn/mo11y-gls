@@ -1,0 +1,54 @@
+# Mo11y - Lifelong Companion AI
+# Production dependencies
+
+# Core Agent Framework
+langgraph>=0.2.0
+langchain-core>=0.3.0
+
+# Web UI
+streamlit>=1.28.0
+
+# LLM Integration
+ollama>=0.1.0
+
+# Data Processing & Analysis
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Visualizations
+plotly>=5.17.0
+
+# HTTP Requests (for server agent)
+requests>=2.31.0
+
+# NLP (optional - for enhanced features)
+spacy>=3.7.0
+
+# Utilities
+python-dateutil>=2.8.0
+typing-extensions>=4.8.0
+markdown>=3.4.0
+
+# Multi-Modal Memory
+Pillow>=10.0.0
+
+# External API Integration
+requests>=2.31.0
+
+# Local MCP Server
+fastapi>=0.104.0
+uvicorn>=0.24.0
+pydantic>=2.0.0
+duckduckgo-search>=4.0.0
+
+# Optional: Audio Processing
+# pydub>=0.25.1
+
+# Calendar Integration (Google Calendar)
+google-api-python-client>=2.100.0
+google-auth-httplib2>=0.1.1
+google-auth-oauthlib>=1.1.0
+
+# Image Generation (FLUX via Hugging Face)
+huggingface-hub>=0.20.0
+Pillow>=10.0.0
