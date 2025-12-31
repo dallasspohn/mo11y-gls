@@ -5,5 +5,10 @@
     "model_name": "deepseek-r1:latest",
     "dev_mode": false,
     "suppress_thinking": true,
-    "mcp_server_url": "http://localhost:8443"
+    "mcp_server_url": "http://localhost:8443",
+    "redhat_content": {
+        "standards_dir": "/home/dallas/dev/redhat-content-standards",
+        "standards_repo": null,
+        "auto_pull": true
+    }
 }

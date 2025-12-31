@@ -103,7 +103,24 @@ All generated content follows:
 
 - Ollama running with DeepSeek R1 model
 - Red Hat content standards directory at `/home/dallas/dev/redhat-content-standards`
+  - **Auto-Update**: The standards repository is automatically pulled before each content creation
+  - **Auto-Clone**: If directory doesn't exist and `standards_repo` URL is configured, it will be cloned automatically
 - Output directory must exist or be creatable
+
+## For Red Hat Employees
+
+**Note**: For Red Hat employees, there is a companion repository that accompanies this one. The Red Hat content creation features automatically pull the latest standards from the `redhat-content-standards` repository when creating training content.
+
+To configure auto-clone (if standards directory doesn't exist):
+1. Edit `local_mcp_server.py`
+2. Find the `RedHatContentCreator` initialization
+3. Set `standards_repo` parameter to your repository URL:
+   ```python
+   _content_creator = RedHatContentCreator(
+       auto_pull=True,
+       standards_repo="https://github.com/redhat/redhat-content-standards.git"
+   )
+   ```
 
 ## Testing
 

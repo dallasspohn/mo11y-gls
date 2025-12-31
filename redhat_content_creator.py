@@ -1,11 +1,14 @@
 """
 Red Hat Content Creator
 Generates Red Hat training content (lectures, GEs, lab scripts) following Red Hat standards
+Automatically pulls latest standards from redhat-content-standards repository
 """
 
 import os
 import json
 import re
+import subprocess
+import shutil
 from typing import Dict, List, Optional, Tuple
 from pathlib import Path
 from datetime import datetime
@@ -22,22 +25,97 @@ except ImportError:
 class RedHatContentCreator:
     """
     Creates Red Hat training content following official standards
+    Automatically pulls/clones redhat-content-standards repository
     """
     
     def __init__(self, 
                  standards_dir: str = "/home/dallas/dev/redhat-content-standards",
-                 model_name: str = "deepseek-r1:latest"):
+                 standards_repo: Optional[str] = None,
+                 model_name: str = "deepseek-r1:latest",
+                 auto_pull: bool = True):
         """
         Initialize Red Hat Content Creator
         
         Args:
             standards_dir: Path to redhat-content-standards directory
+            standards_repo: Git repository URL for redhat-content-standards (optional)
             model_name: Ollama model to use for content generation
+            auto_pull: Automatically pull/clone repo before creating content
         """
         self.standards_dir = Path(standards_dir)
+        self.standards_repo = standards_repo
         self.model_name = model_name
+        self.auto_pull = auto_pull
+        
+        # Ensure standards directory exists and is up to date
+        if self.auto_pull:
+            self._ensure_standards_repo()
+        
         self.templates = self._load_templates()
         self.instructions = self._load_instructions()
+    
+    def _ensure_standards_repo(self):
+        """
+        Ensure redhat-content-standards repository exists and is up to date
+        Clones if missing, pulls if exists
+        """
+        standards_path = self.standards_dir
+        
+        # Check if directory exists
+        if standards_path.exists():
+            # Check if it's a git repository
+            git_dir = standards_path / ".git"
+            if git_dir.exists():
+                # It's a git repo - pull latest changes
+                try:
+                    print(f"Pulling latest changes from redhat-content-standards repository...")
+                    result = subprocess.run(
+                        ["git", "pull"],
+                        cwd=str(standards_path),
+                        capture_output=True,
+                        text=True,
+                        timeout=30
+                    )
+                    if result.returncode == 0:
+                        print(f"✅ Successfully updated redhat-content-standards repository")
+                    else:
+                        print(f"⚠️  Git pull had issues: {result.stderr}")
+                except subprocess.TimeoutExpired:
+                    print(f"⚠️  Git pull timed out, using existing standards")
+                except Exception as e:
+                    print(f"⚠️  Error pulling standards repo: {e}, using existing standards")
+            else:
+                # Directory exists but not a git repo
+                print(f"⚠️  Standards directory exists but is not a git repository")
+                print(f"   Using existing standards at {standards_path}")
+        else:
+            # Directory doesn't exist - clone if repo URL provided
+            if self.standards_repo:
+                try:
+                    print(f"Cloning redhat-content-standards repository from {self.standards_repo}...")
+                    parent_dir = standards_path.parent
+                    parent_dir.mkdir(parents=True, exist_ok=True)
+                    
+                    result = subprocess.run(
+                        ["git", "clone", self.standards_repo, str(standards_path.name)],
+                        cwd=str(parent_dir),
+                        capture_output=True,
+                        text=True,
+                        timeout=60
+                    )
+                    if result.returncode == 0:
+                        print(f"✅ Successfully cloned redhat-content-standards repository")
+                    else:
+                        print(f"⚠️  Git clone failed: {result.stderr}")
+                        print(f"   Will attempt to use standards_dir if it exists")
+                except subprocess.TimeoutExpired:
+                    print(f"⚠️  Git clone timed out")
+                except Exception as e:
+                    print(f"⚠️  Error cloning standards repo: {e}")
+            else:
+                print(f"⚠️  Standards directory not found and no repository URL provided")
+                print(f"   Expected location: {standards_path}")
+                print(f"   Set standards_repo parameter to auto-clone, or ensure directory exists")
         
     def _load_templates(self) -> Dict:
         """Load templates from standards directory"""
@@ -623,6 +701,13 @@ ansible-navigator:
         Returns:
             Dict mapping content type to file paths
         """
+        # Ensure standards are up to date before creating content
+        if self.auto_pull:
+            self._ensure_standards_repo()
+            # Reload templates and instructions in case they were updated
+            self.templates = self._load_templates()
+            self.instructions = self._load_instructions()
+        
         content_types = content_types or ["lecture", "ge", "dynolabs"]
         results = {}
         

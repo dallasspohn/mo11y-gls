@@ -280,8 +280,32 @@ try:
     from redhat_content_creator import RedHatContentCreator
     REDHAT_CONTENT_AVAILABLE = True
     
-    # Initialize content creator
-    _content_creator = RedHatContentCreator()
+    # Initialize content creator with auto-pull enabled
+    # Configuration can be loaded from config.json or environment variables
+    import json
+    import os
+    
+    # Try to load config
+    config_path = os.path.join(os.path.dirname(__file__), "config.json")
+    redhat_config = {}
+    if os.path.exists(config_path):
+        try:
+            with open(config_path, 'r') as f:
+                config = json.load(f)
+                redhat_config = config.get("redhat_content", {})
+        except:
+            pass
+    
+    # Get settings from config or use defaults
+    standards_dir = redhat_config.get("standards_dir", "/home/dallas/dev/redhat-content-standards")
+    standards_repo = redhat_config.get("standards_repo") or os.getenv("REDHAT_STANDARDS_REPO")
+    auto_pull = redhat_config.get("auto_pull", True)
+    
+    _content_creator = RedHatContentCreator(
+        standards_dir=standards_dir,
+        standards_repo=standards_repo,
+        auto_pull=auto_pull
+    )
     
     def create_redhat_content_tool(arguments: Dict) -> Dict:
         """Create Red Hat training content (lectures, GEs, lab scripts)"""

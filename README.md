@@ -144,6 +144,8 @@ Mo11y is designed to be:
 - **Private**: All data stays local
 - **Open Source**: Contribute improvements back to the community
 
+**Note**: For Red Hat employees, there is a companion repository that accompanies this one. The Red Hat content creation features automatically pull the latest standards from the `redhat-content-standards` repository when creating training content.
+
 ### Customization
 
 - **Personas**: Create custom personas in `sonas/` directory
