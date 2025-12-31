@@ -17,7 +17,7 @@ This document records tasks, improvements, and changes made to the Mo11y project
 **Task**: Implement separate conversation histories for each persona
 - Modified `app_enhanced.py` to use per-persona conversation storage
 - Changed from single `conversation_history` list to `conversation_histories` dictionary
-- Each persona (Alex Mercer, CJS, Izzy-Chan) now maintains independent chat threads
+- Each persona now maintains independent chat threads
 - Implemented per-persona thread IDs for LangGraph checkpointing
 - Created PERSONA_CHAT_HISTORY.md documentation
 
@@ -26,20 +26,16 @@ This document records tasks, improvements, and changes made to the Mo11y project
 
 ### 3. Recursive RAG File Loading
 **Task**: Improve RAG data loading to follow references automatically
-- Added `rag_file: "dallas.json"` to Alex Mercer persona
-- Created `RAGs/Blake_rag.json` with family relationship information
 - Implemented recursive RAG file loading in `mo11y_agent.py`
 - Agent now automatically loads main RAG file and all referenced files (up to 3 levels deep)
 - Follows `rag_file` references in `family_members`, `parents`, `siblings`, `children` arrays
 - Created RAG_LOADING_IMPROVEMENTS.md documentation
 
 **Files Changed**:
-- `sonas/alex-mercer.json` - Added rag_file field
 - `mo11y_agent.py` - Added `_load_rag_file_recursive()` method
-- `RAGs/Blake_rag.json` - Created new RAG file
 
 **How It Works**:
-1. Loads main RAG file (e.g., dallas.json)
+1. Loads main RAG file (e.g., example.json)
 2. Scans for `rag_file` references in family_members/parents/siblings
 3. Recursively loads all referenced files
 4. Combines all data for agent context

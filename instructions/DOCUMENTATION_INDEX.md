@@ -25,7 +25,6 @@ Installation and configuration guides:
 
 - **QUICK_START_MCP.md** - Quick start for local MCP server (3-step setup)
 - **LOCAL_MCP_SERVER_SETUP.md** - Complete local MCP server setup guide
-- **ALEX_MERCER_SETUP.md** - Alex Mercer persona setup and configuration
 - **GOOGLE_CALENDAR_SETUP.md** - Google Calendar integration setup
 - **WEATHER_SETUP_QUICK.md** - Weather API quick setup guide
 - **SERVER_SETUP.md** - Server deployment guide

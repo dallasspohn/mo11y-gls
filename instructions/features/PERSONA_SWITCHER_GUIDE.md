@@ -16,14 +16,7 @@ The persona switcher has been added to the left sidebar of `app_enhanced.py`. Yo
 The switcher automatically discovers all `.json` files in your `sonas/` directory. Currently available personas include:
 
 - **Mo11y** - Your lifelong companion who grows with you
-- **Alex Mercer (Molly)** - Personal Assistant
-- **Izzy-Chan** - Sassy, confident, and flirtatious
-- **Friend** - Supportive friend persona
-- **Comedian** - Humor-focused persona
-- **Life Coach** - Motivational and guidance-focused
-- **Developer** - Tech-focused persona
-- **Poet** - Creative writing persona
-- And many more!
+- Create your own custom personas by adding JSON files to the `sonas/` directory
 
 ## Features
 
