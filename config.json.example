@@ -8,7 +8,7 @@
     "mcp_server_url": "http://localhost:8443",
     "redhat_content": {
         "standards_dir": "/home/dallas/dev/redhat-content-standards",
-        "standards_repo": null,
+        "standards_repo": "https://github.com/dallasspohn/redhat-content-standards.git",
         "auto_pull": true
     }
 }

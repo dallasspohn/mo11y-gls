@@ -112,15 +112,16 @@ All generated content follows:
 **Note**: For Red Hat employees, there is a companion repository that accompanies this one. The Red Hat content creation features automatically pull the latest standards from the `redhat-content-standards` repository when creating training content.
 
 To configure auto-clone (if standards directory doesn't exist):
-1. Edit `local_mcp_server.py`
-2. Find the `RedHatContentCreator` initialization
-3. Set `standards_repo` parameter to your repository URL:
-   ```python
-   _content_creator = RedHatContentCreator(
-       auto_pull=True,
-       standards_repo="https://github.com/redhat/redhat-content-standards.git"
-   )
+1. Edit `config.json` and set the `standards_repo` URL:
+   ```json
+   "redhat_content": {
+       "standards_dir": "/home/dallas/dev/redhat-content-standards",
+       "standards_repo": "https://github.com/dallasspohn/redhat-content-standards.git",
+       "auto_pull": true
+   }
    ```
+
+The repository URL is already configured in `config.json.example` for easy setup.
 
 ## Testing
 
