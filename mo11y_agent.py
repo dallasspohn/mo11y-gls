@@ -20,7 +20,7 @@ except ImportError:
 from enhanced_memory import EnhancedMemory
 from companion_engine import CompanionPersonality
 from ollama import chat
-from life_journal import LifeJournal
+from journal import Journal
 from external_apis import ExternalAPIManager
 from mcp_integration import MCPClient, MCPToolExecutor, DockerMCPServer
 from conversation_logger import ConversationLogger
@@ -132,19 +132,18 @@ class Mo11yAgent:
                     persona_name = os.path.basename(sona_path).replace(".json", "") if sona_path else "default"
             self.logger = ConversationLogger(persona_name=persona_name)
         
-        # Initialize life journal if Alex Mercer or CJS persona
-        self.life_journal = None
+        # Initialize journal if configured
+        self.journal = None
         if sona_path:
-            sona_lower = sona_path.lower()
-            if "alex-mercer" in sona_lower or "cjs" in sona_lower or "carroll" in sona_lower:
-                # Try to get life journal path from persona config, default to life-journal.json
-                try:
-                    with open(sona_path, 'r') as f:
-                        sona_data = json.load(f)
-                        journal_path = sona_data.get("life_journal_path", "life-journal.json")
-                except:
-                    journal_path = "life-journal.json"
-                self.life_journal = LifeJournal(journal_path=journal_path, memory=self.memory)
+            # Initialize journal if configured in persona
+            try:
+                with open(sona_path, 'r') as f:
+                    sona_data = json.load(f)
+                    journal_path = sona_data.get("journal_path", "journal.json")
+                    self.journal = Journal(journal_path=journal_path, memory=self.memory)
+            except:
+                # Default journal path
+                self.journal = Journal(journal_path="journal.json", memory=self.memory)
         
         # Initialize external API manager (for weather, etc. - optional)
         self.external_apis = None
@@ -548,7 +547,7 @@ class Mo11yAgent:
         if memories.get("episodic"):
             context_parts.append(f"\nYOUR PREVIOUS CONVERSATIONS WITH {current_persona_name.upper()} (PERSONA-SPECIFIC MEMORIES):")
             context_parts.append("CRITICAL: These are conversations YOU had with the user. Other personas (like Alex Mercer, Izzy-Chan, Jimmy Spohn) have their OWN separate conversations.")
-            context_parts.append("DO NOT confuse these with information from life journal or RAG data - those are shared knowledge, not personal conversations.")
+            context_parts.append("DO NOT confuse these with information from journal or RAG data - those are shared knowledge, not personal conversations.")
             for mem in memories["episodic"][:3]:
                 context_parts.append(f"- [{mem['timestamp']}] {mem['content'][:200]}...")
             context_parts.append("NOTE: If these memories conflict with what the user just said, use what the user just said.")
@@ -671,17 +670,17 @@ class Mo11yAgent:
                     context_parts.append("CRITICAL: This is general knowledge/data, NOT conversations you had with the user.")
                     context_parts.append(f"{json.dumps(rag_data_to_use, indent=2)}")
         
-        # Track life journal usage for logging
-        life_journal_entries_used = []
+        # Track journal usage for logging
+        journal_entries_used = []
         
-        # Add life journal context if available (for Alex Mercer and CJS)
-        if self.life_journal:
+        # Add journal context if available
+        if self.journal:
             # Check if user is asking about history/past events
             history_keywords = ["history", "past", "remember", "before", "ago", "used to", 
                               "from my", "my history", "tell me about", "something about"]
             user_input_lower = user_input.lower()
             
-            # Check if this is a calendar/upcoming events query - SKIP life journal for these
+            # Check if this is a calendar/upcoming events query - SKIP journal for these
             calendar_keywords = ["calendar", "calendars", "upcoming", "events", "schedule", "scheduled", 
                                "what's on", "what is on", "show me my calendar", "my calendar",
                                "appointments", "meetings", "when is", "when are"]
@@ -689,14 +688,14 @@ class Mo11yAgent:
             
             is_history_query = any(keyword in user_input_lower for keyword in history_keywords)
             
-            # Skip life journal for calendar queries - calendar events are separate from historical events
+                # Skip journal for calendar queries - calendar events are separate from historical events
             if is_calendar_query:
-                # Don't add life journal for calendar queries - they're asking about upcoming events, not history
+                # Don't add journal for calendar queries - they're asking about upcoming events, not history
                 pass
             
             if is_history_query:
-                # Search life journal for relevant entries
-                journal_search_results = self.life_journal.search(user_input)
+                # Search journal for relevant entries
+                journal_search_results = self.journal.search(user_input)
                 if journal_search_results:
                     # Track which entries were used
                     for result in journal_search_results[:5]:
@@ -704,12 +703,12 @@ class Mo11yAgent:
                         result_data = result.get("data", {})
                         if result_type == "timeline":
                             year = result_data.get('year', 'Unknown')
-                            life_journal_entries_used.append(f"Timeline[{year}]: {result_data.get('content', '')[:50]}...")
+                            journal_entries_used.append(f"Timeline[{year}]: {result_data.get('content', '')[:50]}...")
                         elif result_type == "friend":
-                            life_journal_entries_used.append(f"Friend: {result_data.get('name', '')}")
+                            journal_entries_used.append(f"Friend: {result_data.get('name', '')}")
                         elif result_type == "location":
-                            life_journal_entries_used.append(f"Location: {result_data.get('city', '')}")
-                    journal_context = "\n=== DALLAS'S LIFE JOURNAL SEARCH RESULTS (SHARED HISTORICAL DATA) ===\n"
+                            journal_entries_used.append(f"Location: {result_data.get('city', '')}")
+                    journal_context = "\n=== JOURNAL SEARCH RESULTS (SHARED HISTORICAL DATA) ===\n"
                     journal_context += "CRITICAL: This is HISTORICAL biographical information, NOT conversations you had with the user.\n"
                     journal_context += "This information is shared - other personas can also see it. It's NOT persona-specific conversation memory.\n"
                     journal_context += "DO NOT confuse this with your own conversations with the user.\n\n"
@@ -725,31 +724,31 @@ class Mo11yAgent:
                             journal_context += f"  Friend: {result_data.get('name', '')} - {mem_str}\n"
                         elif result_type == "location":
                             journal_context += f"  Location: {result_data.get('city', '')}, {result_data.get('state', '')}\n"
-                    journal_context += "\n=== END LIFE JOURNAL ===\n"
+                    journal_context += "\n=== END JOURNAL ===\n"
                     context_parts.append(journal_context)
                 else:
                     # Fall back to summary if no search results
-                    journal_summary = self.life_journal.get_summary()
+                    journal_summary = self.journal.get_summary()
                     if journal_summary and len(journal_summary.strip()) > 50:
                         if self.sona_path and ("cjs" in self.sona_path.lower() or "carroll" in self.sona_path.lower()):
-                            context_parts.append(f"\n=== DALLAS'S LIFE JOURNAL (SHARED HISTORICAL DATA) ===\nCRITICAL: This is HISTORICAL biographical information, NOT conversations you had with the user.\nThis information is shared - other personas can also see it. It's NOT persona-specific conversation memory.\nLook for references to 'Jim', 'Jim's Prop Shop', 'dad', 'father', 'parents', 'mom', 'mother', 'family', 'Carroll', 'Carroll James Spohn' - these are all about you or your family.\n{journal_summary}\n=== END LIFE JOURNAL ===\n")
+                            context_parts.append(f"\n=== JOURNAL (SHARED HISTORICAL DATA) ===\nCRITICAL: This is HISTORICAL biographical information, NOT conversations you had with the user.\nThis information is shared - other personas can also see it. It's NOT persona-specific conversation memory.\n{journal_summary}\n=== END JOURNAL ===\n")
                         else:
-                            context_parts.append(f"\n=== DALLAS'S LIFE JOURNAL (SHARED HISTORICAL DATA) ===\nCRITICAL: This is HISTORICAL biographical information, NOT conversations you had with the user.\nThis information is shared - other personas can also see it. It's NOT persona-specific conversation memory.\nContains many references to you and shared memories.\n{journal_summary}\n=== END LIFE JOURNAL ===\n")
+                            context_parts.append(f"\n=== JOURNAL (SHARED HISTORICAL DATA) ===\nCRITICAL: This is HISTORICAL biographical information, NOT conversations you had with the user.\nThis information is shared - other personas can also see it. It's NOT persona-specific conversation memory.\nContains many references to you and shared memories.\n{journal_summary}\n=== END JOURNAL ===\n")
                     else:
-                        context_parts.append("\n=== LIFE JOURNAL ===\nThe life journal exists but contains minimal information. If asked about history, say you don't have that specific information yet.\n=== END LIFE JOURNAL ===\n")
+                        context_parts.append("\n=== JOURNAL ===\nThe journal exists but contains minimal information. If asked about history, say you don't have that specific information yet.\n=== END JOURNAL ===\n")
             else:
                 # Use summary for non-history queries (but skip for calendar queries)
                 if not is_calendar_query:
-                    journal_summary = self.life_journal.get_summary()
+                    journal_summary = self.journal.get_summary()
                     if journal_summary and len(journal_summary.strip()) > 50:
                         # Add special note for CJS persona about Jim references
                         if self.sona_path and ("cjs" in self.sona_path.lower() or "carroll" in self.sona_path.lower()):
-                            context_parts.append(f"\n=== DALLAS'S LIFE JOURNAL (HISTORICAL EVENTS - NOT CURRENT CALENDAR) ===\nCRITICAL: This is HISTORICAL biographical information, NOT current calendar events or scheduled appointments.\nUse ONLY this information. Look for references to 'Jim', 'Jim's Prop Shop', 'dad', 'father', 'parents', 'mom', 'mother', 'family', 'Carroll', 'Carroll James Spohn' - these are all about you or your family.\n{journal_summary}\n=== END LIFE JOURNAL ===\n")
+                            context_parts.append(f"\n=== JOURNAL (HISTORICAL EVENTS - NOT CURRENT CALENDAR) ===\nCRITICAL: This is HISTORICAL biographical information, NOT current calendar events or scheduled appointments.\nUse ONLY this information.\n{journal_summary}\n=== END JOURNAL ===\n")
                         else:
-                            context_parts.append(f"\n=== DALLAS'S LIFE JOURNAL (HISTORICAL EVENTS - NOT CURRENT CALENDAR) ===\nCRITICAL: This is HISTORICAL biographical information, NOT current calendar events or scheduled appointments.\nUse ONLY this information. Contains many references to you and shared memories.\n{journal_summary}\n=== END LIFE JOURNAL ===\n")
+                            context_parts.append(f"\n=== JOURNAL (HISTORICAL EVENTS - NOT CURRENT CALENDAR) ===\nCRITICAL: This is HISTORICAL biographical information, NOT current calendar events or scheduled appointments.\nUse ONLY this information. Contains many references to you and shared memories.\n{journal_summary}\n=== END JOURNAL ===\n")
                     else:
                         # Journal exists but is empty/minimal
-                        context_parts.append("\n=== LIFE JOURNAL ===\nThe life journal exists but contains minimal information.\n=== END LIFE JOURNAL ===\n")
+                        context_parts.append("\n=== JOURNAL ===\nThe journal exists but contains minimal information.\n=== END JOURNAL ===\n")
         
         # Add local services context (calendar, reminders, tasks)
         # Check if this is a calendar query to prioritize calendar context
@@ -771,9 +770,9 @@ class Mo11yAgent:
                 context_parts.append("UPCOMING CALENDAR EVENTS (CURRENT SCHEDULE - NOT HISTORICAL):")
                 context_parts.append(f"{'='*80}")
                 context_parts.append("CRITICAL: These are ACTUAL calendar events with specific dates/times.")
-                context_parts.append("These are NOT historical events from the life journal.")
+                context_parts.append("These are NOT historical events from the journal.")
                 context_parts.append("Use ONLY these calendar events when answering calendar questions.")
-                context_parts.append("DO NOT confuse life journal timeline entries (which are historical) with calendar events.")
+                context_parts.append("DO NOT confuse journal timeline entries (which are historical) with calendar events.")
                 context_parts.append(f"{'='*80}\n")
             context_parts.append(f"\nLOCAL SERVICES CONTEXT:\n{local_context}")
         
@@ -1904,7 +1903,7 @@ class Mo11yAgent:
             if "data_sources" not in state:
                 state["data_sources"] = {}
             state["data_sources"]["rag_files"] = rag_files_used if 'rag_files_used' in locals() else []
-            state["data_sources"]["life_journal_entries"] = life_journal_entries_used if 'life_journal_entries_used' in locals() else []
+            state["data_sources"]["journal_entries"] = journal_entries_used if 'journal_entries_used' in locals() else []
             state["data_sources"]["mcp_tools"] = mcp_tools_used if 'mcp_tools_used' in locals() else []
             # Add local services data sources (calendar, reminders, tasks)
             # Always store local_services_data if it exists (even if empty) for proper logging
@@ -1953,32 +1952,23 @@ class Mo11yAgent:
             content=f"User: {user_input}\nAssistant: {response}",
             context=json.dumps(context),
             importance=importance,
-            emotional_valence=user_sentiment,
-            emotional_arousal=abs(user_sentiment),
+            emotional_valence=0.0,
+            emotional_arousal=0.0,
             tags=context.get("topics", []),
             relationship_context=f"conversation|persona:{persona_name}"
         )
         
-        # Store emotional memory if significant
-        if abs(user_sentiment) > 0.3:
-            emotion_type = "positive" if user_sentiment > 0 else "negative"
-            self.memory.remember_emotion(
-                emotion_type=emotion_type,
-                intensity=abs(user_sentiment),
-                context=user_input[:100],  # First 100 chars
-                trigger="user_input",
-                memory_id=memory_id
-            )
+        # Note: Emotional memory tracking removed - this is a business tool
         
         # Extract and store semantic facts
         self._extract_and_store_facts(user_input, response, memory_id)
         
-        # Update life journal if available (for Alex Mercer)
-        if self.life_journal:
+        # Update journal if available
+        if self.journal:
             # Extract biographical information from conversation
-            self.life_journal.extract_from_conversation(user_input)
+            self.journal.extract_from_conversation(user_input)
             # Save journal
-            self.life_journal.save_journal()
+            self.journal.save_journal()
         
         # Check for media attachments in context
         if state.get("context", {}).get("has_media"):
@@ -2410,7 +2400,7 @@ class Mo11yAgent:
             if any(keyword in user_input.lower() for keyword in calendar_keywords):
                 context_parts.append("Upcoming Calendar Events (Local):")
                 context_parts.append("No upcoming calendar events found in the next 7 days.")
-                context_parts.append("(Note: Life journal entries are HISTORICAL events, not current calendar events)")
+                context_parts.append("(Note: Journal entries are HISTORICAL events, not current calendar events)")
         
         # Get pending reminders from LOCAL reminder service
         reminders = self.reminder_service.get_pending_reminders()
@@ -2660,8 +2650,8 @@ class Mo11yAgent:
             data_sources = result.get("data_sources", {})
             if data_sources.get("rag_files"):
                 self.logger.set_rag_used(data_sources["rag_files"])
-            if data_sources.get("life_journal_entries"):
-                self.logger.set_life_journal_used(data_sources["life_journal_entries"])
+            if data_sources.get("journal_entries"):
+                self.logger.set_journal_used(data_sources["journal_entries"])
             if data_sources.get("mcp_tools"):
                 self.logger.set_mcp_tools_used(data_sources["mcp_tools"])
             
@@ -2703,18 +2693,8 @@ class Mo11yAgent:
             if any(phrase in user_lower for phrase in ["i'll tell you later", "remind me", "we should talk about", "i need to"]):
                 followup_topics.append("Topic mentioned but not fully discussed")
             
-            # Extract emotional moments (based on sentiment and keywords)
+            # Note: Emotional moment tracking removed - this is a business tool
             emotional_moments = []
-            if abs(sentiment_score) > 0.3:
-                if sentiment_score > 0.3:
-                    emotional_moments.append("Positive emotional moment")
-                else:
-                    emotional_moments.append("Concerned or serious moment")
-            emotional_keywords = ["excited", "worried", "proud", "sad", "happy", "anxious", "grateful", "frustrated"]
-            for keyword in emotional_keywords:
-                if keyword in user_lower or keyword in agent_response.lower():
-                    emotional_moments.append(f"Emotional moment involving {keyword}")
-                    break
             
             # Update CJS JSON after conversation (if CJS persona)
             if CJS_UPDATER_AVAILABLE and ("cjs" in sona_lower or "carroll" in sona_lower):
@@ -2749,7 +2729,6 @@ class Mo11yAgent:
                         user_input=user_input,
                         agent_response=agent_response,
                         conversation_summary=None,
-                        key_emotional_moments=emotional_moments if emotional_moments else None,
                         new_information_learned=new_info if new_info else None,
                         topics_needing_followup=followup_topics if followup_topics else None,
                         isekai_stories_shared=isekai_stories if isekai_stories else None,
@@ -2769,7 +2748,6 @@ class Mo11yAgent:
                         user_input=user_input,
                         agent_response=agent_response,
                         conversation_summary=None,
-                        key_emotional_moments=emotional_moments if emotional_moments else None,
                         new_information_learned=new_info if new_info else None,
                         topics_needing_followup=followup_topics if followup_topics else None,
                         sentiment_score=sentiment_score,

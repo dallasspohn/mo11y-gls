@@ -1,13 +1,12 @@
-# Mo11y - Your Open Source AI Companion 💝
+# Mo11y - Your Open Source AI Business Assistant
 
-A sophisticated, evolving AI companion built with LangGraph that grows and learns with you. Mo11y is designed as an open-source alternative to online chatbots, perfect for personal use, Red Hat colleagues, and anyone who wants a private, customizable AI assistant.
+A sophisticated, evolving AI business assistant built with LangGraph that grows and learns with you. Mo11y is designed as an open-source alternative to online chatbots, perfect for business use, Red Hat colleagues, and anyone who wants a private, customizable AI assistant.
 
 ## 🌟 Features
 
 - **Long-term Memory**: Remembers your conversations, preferences, and important events
 - **Task Management**: Set reminders, manage calendar events, and track tasks
-- **Emotional Support**: Provides empathetic, non-judgmental support
-- **Life Journal**: Builds a comprehensive timeline of your life through conversations
+- **Business Journal**: Builds a comprehensive timeline of your business activities through conversations
 - **Natural Conversations**: Matches your tone and communication style
 - **Privacy-First**: All data stays on your machine - no cloud dependencies
 - **Extensible**: Built with LangGraph for easy customization and extension
@@ -68,14 +67,13 @@ That's it! Mo11y will create the database and start learning from your first con
 ### Memory & Learning
 - Remembers your conversations
 - Learns your preferences
-- Builds a life journal over time
+- Builds a business journal over time
 - Recalls past discussions when relevant
 
-### Emotional Support
-- Empathetic responses
-- Non-judgmental space for thoughts and feelings
+### Business Assistance
+- Professional responses
 - Helps process decisions logically
-- Provides consistent warmth and support
+- Provides efficient business support
 
 ### Natural Conversation
 - Matches your communication style
@@ -182,6 +180,6 @@ For issues, questions, or contributions:
 
 ---
 
-**Built with 💝 for lifelong companionship**
+**Built for professional business use**
 
-*Mo11y - Your AI companion that grows with you*
+*Mo11y - Your AI business assistant that grows with you*

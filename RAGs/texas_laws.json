@@ -1,0 +1,1402 @@
+{
+    "Law_1": {
+        "Title": "Texas Law #1",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #1.",
+        "Statute": "TX Code Section 1001",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_2": {
+        "Title": "Texas Law #2",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #2.",
+        "Statute": "TX Code Section 1002",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_3": {
+        "Title": "Texas Law #3",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #3.",
+        "Statute": "TX Code Section 1003",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_4": {
+        "Title": "Texas Law #4",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #4.",
+        "Statute": "TX Code Section 1004",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_5": {
+        "Title": "Texas Law #5",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #5.",
+        "Statute": "TX Code Section 1005",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_6": {
+        "Title": "Texas Law #6",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #6.",
+        "Statute": "TX Code Section 1006",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_7": {
+        "Title": "Texas Law #7",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #7.",
+        "Statute": "TX Code Section 1007",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_8": {
+        "Title": "Texas Law #8",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #8.",
+        "Statute": "TX Code Section 1008",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_9": {
+        "Title": "Texas Law #9",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #9.",
+        "Statute": "TX Code Section 1009",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_10": {
+        "Title": "Texas Law #10",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #10.",
+        "Statute": "TX Code Section 1010",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_11": {
+        "Title": "Texas Law #11",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #11.",
+        "Statute": "TX Code Section 1011",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_12": {
+        "Title": "Texas Law #12",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #12.",
+        "Statute": "TX Code Section 1012",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_13": {
+        "Title": "Texas Law #13",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #13.",
+        "Statute": "TX Code Section 1013",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_14": {
+        "Title": "Texas Law #14",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #14.",
+        "Statute": "TX Code Section 1014",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_15": {
+        "Title": "Texas Law #15",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #15.",
+        "Statute": "TX Code Section 1015",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_16": {
+        "Title": "Texas Law #16",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #16.",
+        "Statute": "TX Code Section 1016",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_17": {
+        "Title": "Texas Law #17",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #17.",
+        "Statute": "TX Code Section 1017",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_18": {
+        "Title": "Texas Law #18",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #18.",
+        "Statute": "TX Code Section 1018",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_19": {
+        "Title": "Texas Law #19",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #19.",
+        "Statute": "TX Code Section 1019",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_20": {
+        "Title": "Texas Law #20",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #20.",
+        "Statute": "TX Code Section 1020",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_21": {
+        "Title": "Texas Law #21",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #21.",
+        "Statute": "TX Code Section 1021",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_22": {
+        "Title": "Texas Law #22",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #22.",
+        "Statute": "TX Code Section 1022",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_23": {
+        "Title": "Texas Law #23",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #23.",
+        "Statute": "TX Code Section 1023",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_24": {
+        "Title": "Texas Law #24",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #24.",
+        "Statute": "TX Code Section 1024",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_25": {
+        "Title": "Texas Law #25",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #25.",
+        "Statute": "TX Code Section 1025",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_26": {
+        "Title": "Texas Law #26",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #26.",
+        "Statute": "TX Code Section 1026",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_27": {
+        "Title": "Texas Law #27",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #27.",
+        "Statute": "TX Code Section 1027",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_28": {
+        "Title": "Texas Law #28",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #28.",
+        "Statute": "TX Code Section 1028",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_29": {
+        "Title": "Texas Law #29",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #29.",
+        "Statute": "TX Code Section 1029",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_30": {
+        "Title": "Texas Law #30",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #30.",
+        "Statute": "TX Code Section 1030",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_31": {
+        "Title": "Texas Law #31",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #31.",
+        "Statute": "TX Code Section 1031",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_32": {
+        "Title": "Texas Law #32",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #32.",
+        "Statute": "TX Code Section 1032",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_33": {
+        "Title": "Texas Law #33",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #33.",
+        "Statute": "TX Code Section 1033",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_34": {
+        "Title": "Texas Law #34",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #34.",
+        "Statute": "TX Code Section 1034",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_35": {
+        "Title": "Texas Law #35",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #35.",
+        "Statute": "TX Code Section 1035",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_36": {
+        "Title": "Texas Law #36",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #36.",
+        "Statute": "TX Code Section 1036",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_37": {
+        "Title": "Texas Law #37",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #37.",
+        "Statute": "TX Code Section 1037",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_38": {
+        "Title": "Texas Law #38",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #38.",
+        "Statute": "TX Code Section 1038",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_39": {
+        "Title": "Texas Law #39",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #39.",
+        "Statute": "TX Code Section 1039",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_40": {
+        "Title": "Texas Law #40",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #40.",
+        "Statute": "TX Code Section 1040",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_41": {
+        "Title": "Texas Law #41",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #41.",
+        "Statute": "TX Code Section 1041",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_42": {
+        "Title": "Texas Law #42",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #42.",
+        "Statute": "TX Code Section 1042",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_43": {
+        "Title": "Texas Law #43",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #43.",
+        "Statute": "TX Code Section 1043",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_44": {
+        "Title": "Texas Law #44",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #44.",
+        "Statute": "TX Code Section 1044",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_45": {
+        "Title": "Texas Law #45",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #45.",
+        "Statute": "TX Code Section 1045",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_46": {
+        "Title": "Texas Law #46",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #46.",
+        "Statute": "TX Code Section 1046",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_47": {
+        "Title": "Texas Law #47",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #47.",
+        "Statute": "TX Code Section 1047",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_48": {
+        "Title": "Texas Law #48",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #48.",
+        "Statute": "TX Code Section 1048",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_49": {
+        "Title": "Texas Law #49",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #49.",
+        "Statute": "TX Code Section 1049",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_50": {
+        "Title": "Texas Law #50",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #50.",
+        "Statute": "TX Code Section 1050",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_51": {
+        "Title": "Texas Law #51",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #51.",
+        "Statute": "TX Code Section 1051",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_52": {
+        "Title": "Texas Law #52",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #52.",
+        "Statute": "TX Code Section 1052",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_53": {
+        "Title": "Texas Law #53",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #53.",
+        "Statute": "TX Code Section 1053",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_54": {
+        "Title": "Texas Law #54",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #54.",
+        "Statute": "TX Code Section 1054",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_55": {
+        "Title": "Texas Law #55",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #55.",
+        "Statute": "TX Code Section 1055",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_56": {
+        "Title": "Texas Law #56",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #56.",
+        "Statute": "TX Code Section 1056",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_57": {
+        "Title": "Texas Law #57",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #57.",
+        "Statute": "TX Code Section 1057",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_58": {
+        "Title": "Texas Law #58",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #58.",
+        "Statute": "TX Code Section 1058",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_59": {
+        "Title": "Texas Law #59",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #59.",
+        "Statute": "TX Code Section 1059",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_60": {
+        "Title": "Texas Law #60",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #60.",
+        "Statute": "TX Code Section 1060",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_61": {
+        "Title": "Texas Law #61",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #61.",
+        "Statute": "TX Code Section 1061",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_62": {
+        "Title": "Texas Law #62",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #62.",
+        "Statute": "TX Code Section 1062",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_63": {
+        "Title": "Texas Law #63",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #63.",
+        "Statute": "TX Code Section 1063",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_64": {
+        "Title": "Texas Law #64",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #64.",
+        "Statute": "TX Code Section 1064",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_65": {
+        "Title": "Texas Law #65",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #65.",
+        "Statute": "TX Code Section 1065",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_66": {
+        "Title": "Texas Law #66",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #66.",
+        "Statute": "TX Code Section 1066",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_67": {
+        "Title": "Texas Law #67",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #67.",
+        "Statute": "TX Code Section 1067",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_68": {
+        "Title": "Texas Law #68",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #68.",
+        "Statute": "TX Code Section 1068",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_69": {
+        "Title": "Texas Law #69",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #69.",
+        "Statute": "TX Code Section 1069",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_70": {
+        "Title": "Texas Law #70",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #70.",
+        "Statute": "TX Code Section 1070",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_71": {
+        "Title": "Texas Law #71",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #71.",
+        "Statute": "TX Code Section 1071",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_72": {
+        "Title": "Texas Law #72",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #72.",
+        "Statute": "TX Code Section 1072",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_73": {
+        "Title": "Texas Law #73",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #73.",
+        "Statute": "TX Code Section 1073",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_74": {
+        "Title": "Texas Law #74",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #74.",
+        "Statute": "TX Code Section 1074",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_75": {
+        "Title": "Texas Law #75",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #75.",
+        "Statute": "TX Code Section 1075",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_76": {
+        "Title": "Texas Law #76",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #76.",
+        "Statute": "TX Code Section 1076",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_77": {
+        "Title": "Texas Law #77",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #77.",
+        "Statute": "TX Code Section 1077",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_78": {
+        "Title": "Texas Law #78",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #78.",
+        "Statute": "TX Code Section 1078",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_79": {
+        "Title": "Texas Law #79",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #79.",
+        "Statute": "TX Code Section 1079",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_80": {
+        "Title": "Texas Law #80",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #80.",
+        "Statute": "TX Code Section 1080",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_81": {
+        "Title": "Texas Law #81",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #81.",
+        "Statute": "TX Code Section 1081",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_82": {
+        "Title": "Texas Law #82",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #82.",
+        "Statute": "TX Code Section 1082",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_83": {
+        "Title": "Texas Law #83",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #83.",
+        "Statute": "TX Code Section 1083",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_84": {
+        "Title": "Texas Law #84",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #84.",
+        "Statute": "TX Code Section 1084",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_85": {
+        "Title": "Texas Law #85",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #85.",
+        "Statute": "TX Code Section 1085",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_86": {
+        "Title": "Texas Law #86",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #86.",
+        "Statute": "TX Code Section 1086",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_87": {
+        "Title": "Texas Law #87",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #87.",
+        "Statute": "TX Code Section 1087",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_88": {
+        "Title": "Texas Law #88",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #88.",
+        "Statute": "TX Code Section 1088",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_89": {
+        "Title": "Texas Law #89",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #89.",
+        "Statute": "TX Code Section 1089",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_90": {
+        "Title": "Texas Law #90",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #90.",
+        "Statute": "TX Code Section 1090",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_91": {
+        "Title": "Texas Law #91",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #91.",
+        "Statute": "TX Code Section 1091",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_92": {
+        "Title": "Texas Law #92",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #92.",
+        "Statute": "TX Code Section 1092",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_93": {
+        "Title": "Texas Law #93",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #93.",
+        "Statute": "TX Code Section 1093",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_94": {
+        "Title": "Texas Law #94",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #94.",
+        "Statute": "TX Code Section 1094",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_95": {
+        "Title": "Texas Law #95",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #95.",
+        "Statute": "TX Code Section 1095",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_96": {
+        "Title": "Texas Law #96",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #96.",
+        "Statute": "TX Code Section 1096",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_97": {
+        "Title": "Texas Law #97",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #97.",
+        "Statute": "TX Code Section 1097",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_98": {
+        "Title": "Texas Law #98",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #98.",
+        "Statute": "TX Code Section 1098",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_99": {
+        "Title": "Texas Law #99",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #99.",
+        "Statute": "TX Code Section 1099",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_100": {
+        "Title": "Texas Law #100",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #100.",
+        "Statute": "TX Code Section 1100",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_101": {
+        "Title": "Texas Law #101",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #101.",
+        "Statute": "TX Code Section 1101",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_102": {
+        "Title": "Texas Law #102",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #102.",
+        "Statute": "TX Code Section 1102",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_103": {
+        "Title": "Texas Law #103",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #103.",
+        "Statute": "TX Code Section 1103",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_104": {
+        "Title": "Texas Law #104",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #104.",
+        "Statute": "TX Code Section 1104",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_105": {
+        "Title": "Texas Law #105",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #105.",
+        "Statute": "TX Code Section 1105",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_106": {
+        "Title": "Texas Law #106",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #106.",
+        "Statute": "TX Code Section 1106",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_107": {
+        "Title": "Texas Law #107",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #107.",
+        "Statute": "TX Code Section 1107",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_108": {
+        "Title": "Texas Law #108",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #108.",
+        "Statute": "TX Code Section 1108",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_109": {
+        "Title": "Texas Law #109",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #109.",
+        "Statute": "TX Code Section 1109",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_110": {
+        "Title": "Texas Law #110",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #110.",
+        "Statute": "TX Code Section 1110",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_111": {
+        "Title": "Texas Law #111",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #111.",
+        "Statute": "TX Code Section 1111",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_112": {
+        "Title": "Texas Law #112",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #112.",
+        "Statute": "TX Code Section 1112",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_113": {
+        "Title": "Texas Law #113",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #113.",
+        "Statute": "TX Code Section 1113",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_114": {
+        "Title": "Texas Law #114",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #114.",
+        "Statute": "TX Code Section 1114",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_115": {
+        "Title": "Texas Law #115",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #115.",
+        "Statute": "TX Code Section 1115",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_116": {
+        "Title": "Texas Law #116",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #116.",
+        "Statute": "TX Code Section 1116",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_117": {
+        "Title": "Texas Law #117",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #117.",
+        "Statute": "TX Code Section 1117",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_118": {
+        "Title": "Texas Law #118",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #118.",
+        "Statute": "TX Code Section 1118",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_119": {
+        "Title": "Texas Law #119",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #119.",
+        "Statute": "TX Code Section 1119",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_120": {
+        "Title": "Texas Law #120",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #120.",
+        "Statute": "TX Code Section 1120",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_121": {
+        "Title": "Texas Law #121",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #121.",
+        "Statute": "TX Code Section 1121",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_122": {
+        "Title": "Texas Law #122",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #122.",
+        "Statute": "TX Code Section 1122",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_123": {
+        "Title": "Texas Law #123",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #123.",
+        "Statute": "TX Code Section 1123",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_124": {
+        "Title": "Texas Law #124",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #124.",
+        "Statute": "TX Code Section 1124",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_125": {
+        "Title": "Texas Law #125",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #125.",
+        "Statute": "TX Code Section 1125",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_126": {
+        "Title": "Texas Law #126",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #126.",
+        "Statute": "TX Code Section 1126",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_127": {
+        "Title": "Texas Law #127",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #127.",
+        "Statute": "TX Code Section 1127",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_128": {
+        "Title": "Texas Law #128",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #128.",
+        "Statute": "TX Code Section 1128",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_129": {
+        "Title": "Texas Law #129",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #129.",
+        "Statute": "TX Code Section 1129",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_130": {
+        "Title": "Texas Law #130",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #130.",
+        "Statute": "TX Code Section 1130",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_131": {
+        "Title": "Texas Law #131",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #131.",
+        "Statute": "TX Code Section 1131",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_132": {
+        "Title": "Texas Law #132",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #132.",
+        "Statute": "TX Code Section 1132",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_133": {
+        "Title": "Texas Law #133",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #133.",
+        "Statute": "TX Code Section 1133",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_134": {
+        "Title": "Texas Law #134",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #134.",
+        "Statute": "TX Code Section 1134",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_135": {
+        "Title": "Texas Law #135",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #135.",
+        "Statute": "TX Code Section 1135",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_136": {
+        "Title": "Texas Law #136",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #136.",
+        "Statute": "TX Code Section 1136",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_137": {
+        "Title": "Texas Law #137",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #137.",
+        "Statute": "TX Code Section 1137",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_138": {
+        "Title": "Texas Law #138",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #138.",
+        "Statute": "TX Code Section 1138",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_139": {
+        "Title": "Texas Law #139",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #139.",
+        "Statute": "TX Code Section 1139",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_140": {
+        "Title": "Texas Law #140",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #140.",
+        "Statute": "TX Code Section 1140",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_141": {
+        "Title": "Texas Law #141",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #141.",
+        "Statute": "TX Code Section 1141",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_142": {
+        "Title": "Texas Law #142",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #142.",
+        "Statute": "TX Code Section 1142",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_143": {
+        "Title": "Texas Law #143",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #143.",
+        "Statute": "TX Code Section 1143",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_144": {
+        "Title": "Texas Law #144",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #144.",
+        "Statute": "TX Code Section 1144",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_145": {
+        "Title": "Texas Law #145",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #145.",
+        "Statute": "TX Code Section 1145",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_146": {
+        "Title": "Texas Law #146",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #146.",
+        "Statute": "TX Code Section 1146",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_147": {
+        "Title": "Texas Law #147",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #147.",
+        "Statute": "TX Code Section 1147",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_148": {
+        "Title": "Texas Law #148",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #148.",
+        "Statute": "TX Code Section 1148",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_149": {
+        "Title": "Texas Law #149",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #149.",
+        "Statute": "TX Code Section 1149",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_150": {
+        "Title": "Texas Law #150",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #150.",
+        "Statute": "TX Code Section 1150",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_151": {
+        "Title": "Texas Law #151",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #151.",
+        "Statute": "TX Code Section 1151",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_152": {
+        "Title": "Texas Law #152",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #152.",
+        "Statute": "TX Code Section 1152",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_153": {
+        "Title": "Texas Law #153",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #153.",
+        "Statute": "TX Code Section 1153",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_154": {
+        "Title": "Texas Law #154",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #154.",
+        "Statute": "TX Code Section 1154",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_155": {
+        "Title": "Texas Law #155",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #155.",
+        "Statute": "TX Code Section 1155",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_156": {
+        "Title": "Texas Law #156",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #156.",
+        "Statute": "TX Code Section 1156",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_157": {
+        "Title": "Texas Law #157",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #157.",
+        "Statute": "TX Code Section 1157",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_158": {
+        "Title": "Texas Law #158",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #158.",
+        "Statute": "TX Code Section 1158",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_159": {
+        "Title": "Texas Law #159",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #159.",
+        "Statute": "TX Code Section 1159",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_160": {
+        "Title": "Texas Law #160",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #160.",
+        "Statute": "TX Code Section 1160",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_161": {
+        "Title": "Texas Law #161",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #161.",
+        "Statute": "TX Code Section 1161",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_162": {
+        "Title": "Texas Law #162",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #162.",
+        "Statute": "TX Code Section 1162",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_163": {
+        "Title": "Texas Law #163",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #163.",
+        "Statute": "TX Code Section 1163",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_164": {
+        "Title": "Texas Law #164",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #164.",
+        "Statute": "TX Code Section 1164",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_165": {
+        "Title": "Texas Law #165",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #165.",
+        "Statute": "TX Code Section 1165",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_166": {
+        "Title": "Texas Law #166",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #166.",
+        "Statute": "TX Code Section 1166",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_167": {
+        "Title": "Texas Law #167",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #167.",
+        "Statute": "TX Code Section 1167",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_168": {
+        "Title": "Texas Law #168",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #168.",
+        "Statute": "TX Code Section 1168",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_169": {
+        "Title": "Texas Law #169",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #169.",
+        "Statute": "TX Code Section 1169",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_170": {
+        "Title": "Texas Law #170",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #170.",
+        "Statute": "TX Code Section 1170",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_171": {
+        "Title": "Texas Law #171",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #171.",
+        "Statute": "TX Code Section 1171",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_172": {
+        "Title": "Texas Law #172",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #172.",
+        "Statute": "TX Code Section 1172",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_173": {
+        "Title": "Texas Law #173",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #173.",
+        "Statute": "TX Code Section 1173",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_174": {
+        "Title": "Texas Law #174",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #174.",
+        "Statute": "TX Code Section 1174",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_175": {
+        "Title": "Texas Law #175",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #175.",
+        "Statute": "TX Code Section 1175",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_176": {
+        "Title": "Texas Law #176",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #176.",
+        "Statute": "TX Code Section 1176",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_177": {
+        "Title": "Texas Law #177",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #177.",
+        "Statute": "TX Code Section 1177",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_178": {
+        "Title": "Texas Law #178",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #178.",
+        "Statute": "TX Code Section 1178",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_179": {
+        "Title": "Texas Law #179",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #179.",
+        "Statute": "TX Code Section 1179",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_180": {
+        "Title": "Texas Law #180",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #180.",
+        "Statute": "TX Code Section 1180",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_181": {
+        "Title": "Texas Law #181",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #181.",
+        "Statute": "TX Code Section 1181",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_182": {
+        "Title": "Texas Law #182",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #182.",
+        "Statute": "TX Code Section 1182",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_183": {
+        "Title": "Texas Law #183",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #183.",
+        "Statute": "TX Code Section 1183",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_184": {
+        "Title": "Texas Law #184",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #184.",
+        "Statute": "TX Code Section 1184",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_185": {
+        "Title": "Texas Law #185",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #185.",
+        "Statute": "TX Code Section 1185",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_186": {
+        "Title": "Texas Law #186",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #186.",
+        "Statute": "TX Code Section 1186",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_187": {
+        "Title": "Texas Law #187",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #187.",
+        "Statute": "TX Code Section 1187",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_188": {
+        "Title": "Texas Law #188",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #188.",
+        "Statute": "TX Code Section 1188",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_189": {
+        "Title": "Texas Law #189",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #189.",
+        "Statute": "TX Code Section 1189",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_190": {
+        "Title": "Texas Law #190",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #190.",
+        "Statute": "TX Code Section 1190",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_191": {
+        "Title": "Texas Law #191",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #191.",
+        "Statute": "TX Code Section 1191",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_192": {
+        "Title": "Texas Law #192",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #192.",
+        "Statute": "TX Code Section 1192",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_193": {
+        "Title": "Texas Law #193",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #193.",
+        "Statute": "TX Code Section 1193",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_194": {
+        "Title": "Texas Law #194",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #194.",
+        "Statute": "TX Code Section 1194",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_195": {
+        "Title": "Texas Law #195",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #195.",
+        "Statute": "TX Code Section 1195",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_196": {
+        "Title": "Texas Law #196",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #196.",
+        "Statute": "TX Code Section 1196",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_197": {
+        "Title": "Texas Law #197",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #197.",
+        "Statute": "TX Code Section 1197",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_198": {
+        "Title": "Texas Law #198",
+        "Category": "General Law",
+        "Summary": "This is a brief description of Texas Law #198.",
+        "Statute": "TX Code Section 1198",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_199": {
+        "Title": "Texas Law #199",
+        "Category": "Criminal Law",
+        "Summary": "This is a brief description of Texas Law #199.",
+        "Statute": "TX Code Section 1199",
+        "Effective_Date": "2023-01-01"
+    },
+    "Law_200": {
+        "Title": "Texas Law #200",
+        "Category": "Civil Law",
+        "Summary": "This is a brief description of Texas Law #200.",
+        "Statute": "TX Code Section 1200",
+        "Effective_Date": "2023-01-01"
+    }
+}

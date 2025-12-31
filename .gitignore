@@ -57,7 +57,7 @@ conversation_logs/
 *.txt
 
 # Personal data
-life-journal.json
+journal.json
 *.backup
 *.old
 

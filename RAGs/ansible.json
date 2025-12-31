@@ -1,0 +1,17 @@
+{
+    "document_type": "ansible_best_practices",
+    "instructions": "Use the 'Ansible' key to find information about best practices and fun facts.  Look within the appropriate subsection (e.g., 'Best Practices', 'Fun Facts').",
+    "data": {
+      "Ansible": {
+        "Best Practices": {
+          "Idempotency": "Ensure operations can be run repeatedly without unintended side effects.",
+          "Modularity": "Break down complex tasks into reusable roles and playbooks.",
+          "Variables": "Use variables to make playbooks flexible and configurable."
+        },
+        "Fun Facts": {
+          "Origin": "The name 'Ansible' is inspired by the science fiction novel 'Ender's Game'.",
+          "Other Fact": "Ansible is agentless, meaning it doesn't require any software to be installed on the managed nodes."
+        }
+      }
+    }
+  }

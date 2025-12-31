@@ -1,0 +1,216 @@
+{
+    "document_type": "ansible_module_list",
+    "instructions": "Use the 'modules' key to access information about Ansible modules. The 'modules' value is a list of dictionaries. Each dictionary represents a collection of modules (e.g., 'ansible.builtin'). Within each collection, the keys are module names (e.g., 'file', 'copy') and the values are dictionaries containing 'short_name' and 'description' for each module.  To find the description of a module, access it by its fully qualified name (e.g., 'ansible.builtin.file').",
+    "data": {
+      "modules": [
+        {
+          "ansible.builtin": {
+            "file": {
+              "short_name": "file",
+              "description": "Manage files and their properties."
+            },
+            "copy": {
+              "short_name": "copy",
+              "description": "Copies files to remote locations."
+            },
+            "template": {
+              "short_name": "template",
+              "description": "Templates a file out to a remote server."
+            },
+            "yum": {
+              "short_name": "yum",
+              "description": "Manages packages with the yum package manager."
+            },
+            "apt": {
+              "short_name": "apt",
+              "description": "Manages packages with the apt package manager."
+            },
+            "service": {
+              "short_name": "service",
+              "description": "Manage services."
+            },
+            "user": {
+              "short_name": "user",
+              "description": "Manage user accounts."
+            },
+            "group": {
+              "short_name": "group",
+              "description": "Manage group accounts."
+            },
+            "ping": {
+              "short_name": "ping",
+              "description": "Try to connect to host, verify a usable python and return pong on success."
+            },
+            "command": {
+              "short_name": "command",
+              "description": "Execute commands on targets."
+            },
+            "shell": {
+              "short_name": "shell",
+              "description": "Execute shell commands on targets."
+            },
+            "raw": {
+              "short_name": "raw",
+              "description": "Execute raw commands on remote hosts."
+            },
+            "debug": {
+              "short_name": "debug",
+              "description": "Print statements during execution."
+            },
+            "include_tasks": {
+              "short_name": "include_tasks",
+              "description": "Dynamically include a task list."
+            },
+            "import_tasks": {
+              "short_name": "import_tasks",
+              "description": "Import a task list."
+            },
+            "set_fact": {
+              "short_name": "set_fact",
+              "description": "Set host facts from a task."
+            },
+            "get_url": {
+              "short_name": "get_url",
+              "description": "Downloads files from HTTP, HTTPS, or FTP to node."
+            },
+            "unarchive": {
+              "short_name": "unarchive",
+              "description": "Unpacks an archive after (optionally) copying it from the local machine."
+            },
+            "lineinfile": {
+              "short_name": "lineinfile",
+              "description": "Ensure a particular line is in a file, or replace an existing line using a back-referenced regular expression."
+            },
+            "cron": {
+              "short_name": "cron",
+              "description": "Manage cron.d and crontab entries."
+            },
+            "mount": {
+              "short_name": "mount",
+              "description": "Control active and configured mount points."
+            },
+            "hostname": {
+              "short_name": "hostname",
+              "description": "Manage hostname."
+            },
+            "selinux": {
+              "short_name": "selinux",
+              "description": "Change policy and state of SELinux."
+            },
+            "setup": {
+              "short_name": "setup",
+              "description": "Gathers facts about remote hosts."
+            },
+            "stat": {
+              "short_name": "stat",
+              "description": "Retrieve file or file system status."
+            },
+            "wait_for": {
+              "short_name": "wait_for",
+              "description": "Waits for a condition before continuing."
+            },
+            "uri": {
+              "short_name": "uri",
+              "description": "Interacts with web services."
+            },
+            "git": {
+              "short_name": "git",
+              "description": "Deploy software (or files) from git checkouts."
+            },
+            "svn": {
+              "short_name": "svn",
+              "description": "Deploy software (or files) from SVN checkouts."
+            },
+            "hg": {
+              "short_name": "hg",
+              "description": "Deploy software (or files) from Mercurial checkouts."
+            },
+            "bzr": {
+              "short_name": "bzr",
+              "description": "Deploy software (or files) from Bazaar checkouts."
+            },
+            "mysql_db": {
+              "short_name": "mysql_db",
+              "description": "Add or remove MySQL databases from a remote host."
+            },
+            "postgresql_db": {
+              "short_name": "postgresql_db",
+              "description": "Add or remove PostgreSQL databases from a remote host."
+            },
+            "mongodb": {
+              "short_name": "mongodb",
+              "description": "Add or remove MongoDB databases from a remote host."
+            },
+            "redis": {
+              "short_name": "redis",
+              "description": "Manage Redis key-value store."
+            },
+            "docker_container": {
+              "short_name": "docker_container",
+              "description": "Manage Docker containers."
+            },
+            "docker_image": {
+              "short_name": "docker_image",
+              "description": "Manage Docker images."
+            },
+            "k8s": {
+              "short_name": "k8s",
+              "description": "Manage Kubernetes resources."
+            },
+            "ec2": {
+              "short_name": "ec2",
+              "description": "Create, terminate, start or stop an instance in EC2."
+            },
+            "s3": {
+              "short_name": "s3",
+              "description": "Manage S3 buckets in AWS."
+            },
+            "rds": {
+              "short_name": "rds",
+              "description": "Manage RDS instances in AWS."
+            },
+            "lambda": {
+              "short_name": "lambda",
+              "description": "Manage AWS Lambda functions."
+            },
+            "azure_rm": {
+              "short_name": "azure_rm",
+              "description": "Manage Azure Resource Manager resources."
+            },
+            "gcp_compute": {
+              "short_name": "gcp_compute",
+              "description": "Manage Google Cloud Platform Compute Engine instances."
+            },
+            "openstack": {
+              "short_name": "openstack",
+              "description": "Manage OpenStack instances."
+            },
+            "vsphere_guest": {
+              "short_name": "vsphere_guest",
+              "description": "Manage VMware vSphere guest virtual machines."
+            },
+            "win_feature": {
+              "short_name": "win_feature",
+              "description": "Installs and uninstalls Windows Features on Windows Server."
+            },
+            "win_service": {
+              "short_name": "win_service",
+              "description": "Manage and query Windows services."
+            },
+            "win_user": {
+              "short_name": "win_user",
+              "description": "Manage Windows user accounts."
+            },
+            "win_group": {
+              "short_name": "win_group",
+              "description": "Manage Windows groups."
+            },
+            "win_copy": {
+              "short_name": "win_copy.",
+              "description": "Copy windows stuff."
+            }
+          }
+        }
+      ]
+    }
+  }

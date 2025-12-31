@@ -59,8 +59,6 @@ class EnhancedMemory:
                 content TEXT NOT NULL,
                 context TEXT,
                 importance_score REAL DEFAULT 0.5,
-                emotional_valence REAL DEFAULT 0.0,
-                emotional_arousal REAL DEFAULT 0.0,
                 tags TEXT,
                 relationship_context TEXT,
                 consolidated BOOLEAN DEFAULT 0
@@ -82,19 +80,7 @@ class EnhancedMemory:
             )
         """)
         
-        # Emotional memories - sentiment tracking
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS emotional_memories (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                emotion_type TEXT NOT NULL,
-                intensity REAL NOT NULL,
-                context TEXT,
-                trigger TEXT,
-                memory_id INTEGER,
-                FOREIGN KEY (memory_id) REFERENCES episodic_memories(id)
-            )
-        """)
+        # Note: Emotional memories table removed - this is a business tool
         
         # Relationship milestones
         cursor.execute("""
@@ -180,8 +166,7 @@ class EnhancedMemory:
         os.makedirs(os.path.join(self.media_dir, "thumbnails"), exist_ok=True)
     
     def remember_episodic(self, content: str, context: str = "", 
-                         importance: float = 0.5, emotional_valence: float = 0.0,
-                         emotional_arousal: float = 0.0, tags: List[str] = None,
+                         importance: float = 0.5, tags: List[str] = None,
                          relationship_context: str = "") -> int:
         """Store an episodic memory (specific event/conversation)"""
         conn = sqlite3.connect(self.db_path)
@@ -356,7 +341,7 @@ class EnhancedMemory:
         
         query = """
             SELECT id, timestamp, content, context, importance_score, 
-                   emotional_valence, emotional_arousal, tags, relationship_context
+                   tags, relationship_context
             FROM episodic_memories
             WHERE importance_score >= ?
         """
@@ -392,8 +377,6 @@ class EnhancedMemory:
                 'content': row[2],
                 'context': row[3],
                 'importance_score': row[4],
-                'emotional_valence': row[5],
-                'emotional_arousal': row[6],
                 'tags': json.loads(row[7]) if row[7] else [],
                 'relationship_context': row[8]
             })
@@ -761,8 +744,8 @@ class EnhancedMemory:
         cursor.execute("SELECT COUNT(*) FROM semantic_memories")
         counts['semantic'] = cursor.fetchone()[0]
         
-        cursor.execute("SELECT COUNT(*) FROM emotional_memories")
-        counts['emotional'] = cursor.fetchone()[0]
+        # Note: Emotional memories removed - this is a business tool
+        counts['emotional'] = 0
         
         cursor.execute("SELECT COUNT(*) FROM relationship_milestones")
         counts['milestones'] = cursor.fetchone()[0]

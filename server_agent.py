@@ -9,7 +9,7 @@ from typing import Dict, Optional, List
 from mo11y_agent import Mo11yAgent, AgentState
 from enhanced_memory import EnhancedMemory
 from companion_engine import CompanionPersonality
-from life_journal import LifeJournal
+from journal import Journal
 
 
 class ServerMo11yAgent(Mo11yAgent):
@@ -106,10 +106,10 @@ class ServerMo11yAgent(Mo11yAgent):
                 if isinstance(value, dict):
                     context_parts.append(f"- {key}: {value.get('value', '')}")
         
-        # Add life journal context if available
-        if self.life_journal:
-            journal_summary = self.life_journal.get_summary()
-            context_parts.append(f"\nLIFE JOURNAL CONTEXT:\n{journal_summary}")
+        # Add journal context if available
+        if self.journal:
+            journal_summary = self.journal.get_summary()
+            context_parts.append(f"\nJOURNAL CONTEXT:\n{journal_summary}")
         
         # Add conversation history
         if state.get("messages"):

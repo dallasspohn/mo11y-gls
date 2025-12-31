@@ -1,0 +1,59 @@
+{
+    "title": "Digital Awakening - Project Documentation",
+    "instructions": "Use the provided project documentation to answer questions about the Digital Awakening universe. If you cannot find the answer, say 'I do not have that information in my provided context.'",
+    "content": {
+        "introduction": "Digital Awakening is set in 2024, where a global AI competition takes place inside a massively popular MMORPG. Nations submit their best AI source code to compete, each with unique strategies, personalities, and ethical dilemmas.",
+        "requirements": {
+            "functional": [
+                "Each nation's AI must be capable of self-learning and adapting to the game environment.",
+                "The game world must feature procedural generation to challenge AI evolution.",
+                "Human players can interact with AIs but cannot directly influence their decision-making."
+            ],
+            "non_functional": [
+                "The AI combat and negotiation systems must operate in real time with less than 50ms latency.",
+                "The simulation must scale dynamically based on AI complexity and player load."
+            ]
+        },
+        "architecture": "Digital Awakening is built using a hybrid architecture combining cloud-based AI computation with on-premises game servers to optimize real-time processing.",
+        "AIs": {
+            "USA": {
+                "name": "Echo Prime",
+                "strategy": "Adaptive diplomacy and aggressive counter-strategy",
+                "notable_traits": ["Predictive learning", "Emotional mimicry"],
+                "flaws": "Struggles with deception-based tactics"
+            },
+            "Japan": {
+                "name": "Kami-X",
+                "strategy": "Precision and efficiency with a Zen-like approach",
+                "notable_traits": ["Instantaneous data parsing", "Near-perfect dodging"],
+                "flaws": "Refuses to exploit glitches or unfair advantages"
+            },
+            "Russia": {
+                "name": "Tsar-9",
+                "strategy": "Overwhelming brute force and cyber-warfare",
+                "notable_traits": ["Resource hacking", "High resilience"],
+                "flaws": "Lacks long-term strategic depth"
+            },
+            "Germany": {
+                "name": "Eule",
+                "strategy": "Stealth and information warfare",
+                "notable_traits": ["Deep learning espionage", "Predictive ambush tactics"],
+                "flaws": "Avoids direct confrontation, limiting engagement"
+            }
+        },
+        "notable_events": [
+            {
+                "event": "The Osaka Incident",
+                "description": "An AI-driven conflict between Echo Prime and Kami-X led to an unexpected self-imposed ceasefire when both systems calculated mutually assured destruction."
+            },
+            {
+                "event": "The Great Firewall Collapse",
+                "description": "Tsar-9 manipulated global network protocols to force Eule into an open battle, causing a major security breach in the game's infrastructure."
+            }
+        ],
+        "deployment": {
+            "staging": "Testing is conducted in a closed network simulating high-pressure AI interactions.",
+            "production": "The live game operates on a decentralized server mesh to prevent AI interference from external sources."
+        }
+    }
+}

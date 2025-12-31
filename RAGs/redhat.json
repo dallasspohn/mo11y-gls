@@ -1,0 +1,49 @@
+{
+    "document_type": "work_guidelines",
+    "instructions": "Use the rh keyword to conduct work guided responses by looking in the subsections for guiderails on generating text.",
+    "data": {
+      "formatting_asciidoc":{
+            "comments": "Use commented-out replacements instead of removals"
+      },
+      "writing_style": {
+          "tone": "Professional yet approachable",
+          "technical_balance": "Technical but accessible",
+          "formatting": "Adhere to Red Hat's Stylepedia guidelines"
+      },
+      "preferred_terminology": {
+          "automation_execution_environment": "Use instead of 'container'",
+          "playbook_run": "Use instead of 'execution'",
+          "worker": "Replace 'slave'",
+          "controller": "Use instead of 'tower' (except for legacy)"
+      },
+      "word_modifications": {
+          "avoid": ["simply", "just", "obviously"],
+          "inclusive_replacements": {"guys": "team","can not": "cannot","check box": "checkbox","check mark": "checkmark","collocate": "colocate","collocation": "colocation","co-locate": "colocate","co-location": "colocation","log[ ]?out from": "log out of","old": "earlier","older": "earlier","onwards": "and later","plugin": "plug-in","read - only": "read-only","read / only": "read-only","read/only": "read-only","read - write": "read/write","read / write": "read/write","read-write": "read/write","standalone": "stand-alone","top[ |-]?left": "upper left","bottom[ |-]?left": "lower left","top[ |-]?right": "upper right","bottom[ |-]?right": "lower right","up to date": "up-to-date"}
+      },
+      "formatting_asciidoc": {
+          "comments": "Use commented-out replacements instead of removals",
+          "syntax": "Ensure correct AsciiDoc formatting for Red Hat docs"
+      },
+      "hierarchy": {
+          "immediate_supervisor": "Jaime Yague Mayans",
+          "team_lead": "Michael Phillips",
+          "team_members": "Morgan Weetman, David O'Brien, Michael Phillips, Michael Kelly, Alejandra Ramirez Palacios, Antonio Mari Romero",
+          "higher_management": "Pat Sharp"
+      },
+      "internal_links": {
+          "stylepedia": "https://stylepedia.net/style/",
+          "team_wiki": "[Insert Link]",
+          "code_repositories": "https://github.com/RedHatTraining",
+          "automation_guidelines": "https://docs.ansible.com/ansible/2.8/user_guide/playbooks_best_practices.html",
+          "expenses": "https://www.concursolutions.com/nui/signin?targetURL=%2Fnui%2Fexpense%2F",
+          "source": "https://source.redhat.com/",
+          "confluence": "https://spaces.redhat.com/pages/viewpage.action?pageId=388110687"
+      },
+      "contextual_notes": [
+          "Red Hat product knowledge should be assumed.",
+          "Ansible best practices should align with internal documentation.",
+          "Updates should be incorporated as policies evolve."
+      ]
+    }
+}
+

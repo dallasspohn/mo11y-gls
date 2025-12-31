@@ -155,19 +155,19 @@ DATA SOURCES USED:
         else:
             log_entry += "  RAG data: None used\n"
         
-        # Life journal (check if used)
-        log_entry += "\nLIFE JOURNAL:\n"
-        life_journal_entries = data_sources.get("life_journal_entries", [])
-        if life_journal_entries:
-            log_entry += f"  Life journal entries referenced ({len(life_journal_entries)}):\n"
-            for entry in life_journal_entries[:5]:  # Limit to 5
+        # Journal (check if used)
+        log_entry += "\nJOURNAL:\n"
+        journal_entries = data_sources.get("journal_entries", [])
+        if journal_entries:
+            log_entry += f"  Journal entries referenced ({len(journal_entries)}):\n"
+            for entry in journal_entries[:5]:  # Limit to 5
                 log_entry += f"    - {entry}\n"
-        elif hasattr(self, '_life_journal_used') and self._life_journal_used:
-            log_entry += f"  Life journal entries referenced ({len(self._life_journal_used)}):\n"
-            for entry in self._life_journal_used[:5]:
+        elif hasattr(self, '_journal_used') and self._journal_used:
+            log_entry += f"  Journal entries referenced ({len(self._journal_used)}):\n"
+            for entry in self._journal_used[:5]:
                 log_entry += f"    - {entry}\n"
         else:
-            log_entry += "  Life journal: None used\n"
+            log_entry += "  Journal: None used\n"
         
         # Local Services (Calendar, Reminders, Tasks)
         log_entry += "\nLOCAL SERVICES:\n"
@@ -338,9 +338,9 @@ MEMORIES: {len(memories_retrieved.get('episodic', []))} episodic, {len(memories_
         """Mark which RAG files were used"""
         self._rag_used = rag_files
     
-    def set_life_journal_used(self, entries: List[str]):
-        """Mark which life journal entries were used"""
-        self._life_journal_used = entries
+    def set_journal_used(self, entries: List[str]):
+        """Mark which journal entries were used"""
+        self._journal_used = entries
     
     def set_mcp_tools_used(self, tools: List[str]):
         """Mark which MCP tools were used"""

@@ -1,0 +1,6 @@
+[
+    {"role": "system", "content": "This is information about GLS."},
+    {"role": "assistant", "content": "How can I assist you with GLS today?"}
+    {"role": "user", "content": "How do I use ansible-navigator effectively?"},
+    {"role": "assistant", "content": "Ansible Navigator is a TUI-based interface that simplifies playbook management..."}
+]

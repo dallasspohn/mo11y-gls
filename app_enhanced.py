@@ -651,7 +651,7 @@ if page == "💬 Chat":
     
     # Chat input with file upload
     with st.form("chat_form", clear_on_submit=True):
-        user_input = st.text_area("Your message:", height=100, placeholder="Share your thoughts, feelings, or ask me anything...")
+        user_input = st.text_area("Your message:", height=100, placeholder="Ask me anything or request assistance...")
         
         # File uploader for images and audio
         col1, col2 = st.columns([3, 1])
@@ -689,10 +689,10 @@ if page == "💬 Chat":
                 
                 if journal_text:
                     try:
-                        # Save to life journal (if available)
-                        if hasattr(agent, 'life_journal') and agent.life_journal:
-                            # Add as timeline entry (saves to life-journal.json only)
-                            agent.life_journal.add_timeline_entry(
+                        # Save to journal (if available)
+                        if hasattr(agent, 'journal') and agent.journal:
+                            # Add as timeline entry (saves to journal.json only)
+                            agent.journal.add_timeline_entry(
                                 year=None,
                                 content=journal_text,
                                 context={"source": "command", "type": "journal_entry"}
@@ -700,11 +700,11 @@ if page == "💬 Chat":
                             
                             st.success("✅ Journal entry saved!")
                             # Show confirmation message
-                            response = f"I've saved your journal entry: \"{journal_text[:100]}{'...' if len(journal_text) > 100 else ''}\"\n\nIt's been stored in life-journal.json for future reference."
+                            response = f"I've saved your journal entry: \"{journal_text[:100]}{'...' if len(journal_text) > 100 else ''}\"\n\nIt's been stored in journal.json for future reference."
                         else:
-                            # Fallback if life journal not available
-                            st.warning("⚠️ Life journal not available. Journal entry not saved.")
-                            response = "I couldn't save your journal entry because the life journal system is not available."
+                            # Fallback if journal not available
+                            st.warning("⚠️ Journal not available. Journal entry not saved.")
+                            response = "I couldn't save your journal entry because the journal system is not available."
                         
                         # Add to conversation history
                         import datetime
@@ -1424,9 +1424,7 @@ elif page == "📊 Relationship":
     with col3:
         st.metric("Milestones", len(relationship_summary["milestones"]))
     with col4:
-        emotional_patterns = relationship_summary.get("emotional_patterns", [])
-        if emotional_patterns:
-            dominant_emotion = max(emotional_patterns, key=lambda x: x["frequency"])
+        # Note: Emotional patterns removed - this is a business tool
             st.metric("Dominant Emotion", dominant_emotion["emotion"].title())
     
     st.markdown("---")
@@ -1846,7 +1844,7 @@ elif page == "⚙️ Settings":
             **Memory Data:**
             - ✅ All conversations (episodic memories)
             - ✅ All facts about you (semantic memories)
-            - ✅ All emotional memories
+            - ✅ All memories
             - ✅ All relationship milestones
             - ✅ All learned preferences
             - ✅ All conversation patterns
@@ -1861,7 +1859,7 @@ elif page == "⚙️ Settings":
             **What will NOT be deleted:**
             - ✅ External API configurations (calendar, weather, etc.)
             - ✅ API cache and call history
-            - ✅ life-journal.json file
+            - ✅ journal.json file
             """)
             
             st.session_state.delete_include_personality = st.checkbox(
@@ -1878,7 +1876,7 @@ elif page == "⚙️ Settings":
             st.markdown("""
             **Old, Low-Importance Memories Only:**
             - ✅ Conversations older than 90 days with low importance (< 0.3)
-            - ✅ Related emotional memories
+            - ✅ Related memories
             - ✅ Related semantic memories
             - ✅ Related media files
             

@@ -1,0 +1,71 @@
+{
+  "subject": {
+    "name": "Dallas Spohn",
+    "age": 53,
+    "location": "Crandall, TX 75114",
+    "employer": "Red Hat",
+    "birth_date": null,
+    "birth_location": null
+  },
+  "timeline": [
+    {
+      "year": null,
+      "content": "Referenced date: the days",
+      "context": {
+        "source": "ner",
+        "snippet": "I will keep it backed up in the future. How is the adventuring life there treating you? Do you enjoy it? Is it better than spending the days working for the man or bass fishing?"
+      },
+      "added_at": "2025-12-29T17:34:01.295844"
+    },
+    {
+      "year": null,
+      "content": "Referenced date: this month",
+      "context": {
+        "source": "ner",
+        "snippet": "How much is the TVEX bill this month?"
+      },
+      "added_at": "2025-12-30T16:56:48.909680"
+    },
+    {
+      "year": null,
+      "content": "Referenced date: this week",
+      "context": {
+        "source": "ner",
+        "snippet": "Do I have any bills that need paid this week?"
+      },
+      "added_at": "2025-12-30T17:32:56.365265"
+    },
+    {
+      "year": null,
+      "content": "Referenced date: the first of next month",
+      "context": {
+        "source": "ner",
+        "snippet": "What about on the first of next month?"
+      },
+      "added_at": "2025-12-30T18:57:54.514876"
+    },
+    {
+      "year": 1940,
+      "content": "Referenced date: 1940",
+      "context": {
+        "source": "ner",
+        "snippet": "Please remind me at 1940 to finally go take my shower."
+      },
+      "added_at": "2025-12-30T19:38:42.934647"
+    }
+  ],
+  "friends": [],
+  "family": [],
+  "locations": [],
+  "education": [],
+  "career": [],
+  "relationships": [],
+  "significant_events": [],
+  "interests": [],
+  "patterns": {
+    "emotional_patterns": [],
+    "decision_patterns": [],
+    "communication_patterns": []
+  },
+  "last_updated": "2025-12-30T19:38:42.934881"
+}
