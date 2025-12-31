@@ -6,6 +6,7 @@ A stateful, evolving AI companion that grows with you
 from typing import TypedDict, List, Dict, Optional
 import json
 import os
+import re
 from datetime import datetime
 
 try:
@@ -964,6 +965,100 @@ class Mo11yAgent:
                     except Exception as e:
                         # If tool call fails, continue without search results
                         print(f"Web search error: {e}")
+            
+            # Auto-detect and execute Red Hat content creation if needed
+            redhat_content_keywords = [
+                "create a lecture", "create lecture", "make a lecture", "generate lecture",
+                "create a ge", "create ge", "create guided exercise", "make a ge",
+                "create lab", "create lab script", "create dynolab", "create dynolabs",
+                "red hat content", "redhat content", "training content",
+                "create lecture and ge", "create lecture and lab", "create ge and lab",
+                "lecture on", "ge on", "lab on", "guided exercise on"
+            ]
+            
+            needs_redhat_content = any(keyword in user_input_lower for keyword in redhat_content_keywords)
+            
+            if needs_redhat_content and self.mcp_executor:
+                print(f"DEBUG [REDHAT CONTENT]: Red Hat content creation detected!")
+                try:
+                    # Extract output directory if specified
+                    output_dir = "/home/dallas/dev/au0025l-demo"  # Default
+                    dir_patterns = [
+                        r"in\s+(/[\w/]+)",
+                        r"directory[:\s]+([/\w]+)",
+                        r"to\s+(/[\w/]+)",
+                    ]
+                    for pattern in dir_patterns:
+                        match = re.search(pattern, user_input, re.IGNORECASE)
+                        if match:
+                            output_dir = match.group(1).strip()
+                            break
+                    
+                    # Call Red Hat content creation tool
+                    content_result = self.mcp_executor.execute_tool(
+                        "create_redhat_content",
+                        {
+                            "request": user_input,
+                            "output_directory": output_dir
+                        },
+                        context={"user_query": user_input}
+                    )
+                    
+                    if content_result and content_result.get("success"):
+                        files_created = content_result.get("files_created", {})
+                        parsed_request = content_result.get("parsed_request", {})
+                        
+                        # Add success message to context
+                        content_success_msg = f"""
+╔══════════════════════════════════════════════════════════════════════════════╗
+║          ✅ RED HAT CONTENT CREATED SUCCESSFULLY ✅                          ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║  Topic: {parsed_request.get('topic', 'Unknown')}                            ║
+║  Content Types: {', '.join(parsed_request.get('content_types', []))}        ║
+║  Output Directory: {output_dir}                                              ║
+║                                                                              ║
+║  Files Created:                                                              ║"""
+                        
+                        for content_type, paths in files_created.items():
+                            if isinstance(paths, dict):
+                                content_success_msg += f"\n║    {content_type.upper()}:"
+                                for key, path in paths.items():
+                                    content_success_msg += f"\n║      - {key}: {path}"
+                            else:
+                                content_success_msg += f"\n║    - {content_type}: {paths}"
+                        
+                        content_success_msg += """
+║                                                                              ║
+║  ⚠️  CRITICAL: The content has ALREADY been created.                        ║
+║  ⚠️  DO NOT explain how to use tools or run commands.                        ║
+║  ⚠️  Simply acknowledge that the content was created successfully!           ║
+║                                                                              ║
+║  Your response should be like:                                              ║
+║  "Done! I've created the Red Hat training content for you."                 ║
+║  or "I've created the lecture, GE, and lab scripts as requested."          ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+"""
+                        # Insert at beginning of context (after system prompt)
+                        insert_index = 0
+                        for i, part in enumerate(context_parts):
+                            if "SYSTEM INSTRUCTIONS" in part or "Core Identity" in part:
+                                insert_index = i + 1
+                                for j in range(i, len(context_parts)):
+                                    if "CONTEXT FROM OUR RELATIONSHIP" in context_parts[j] or "ADDITIONAL CONTEXT" in context_parts[j]:
+                                        insert_index = j + 1
+                                        break
+                                break
+                        context_parts.insert(insert_index, content_success_msg)
+                        mcp_tools_used.append(f"create_redhat_content: {parsed_request.get('topic', 'Unknown')}")
+                        state["redhat_content_created"] = files_created
+                    elif content_result:
+                        error = content_result.get("error", "Unknown error")
+                        print(f"Red Hat content creation failed: {error}")
+                        context_parts.append(f"\n\nNOTE: Attempted to create Red Hat content but encountered error: {error}")
+                except Exception as e:
+                    print(f"Red Hat content creation error: {e}")
+                    import traceback
+                    traceback.print_exc()
         
         # Auto-detect and execute image generation if needed (works independently of MCP)
         # More specific keywords first, then general ones

@@ -275,6 +275,78 @@ register_tool(
     handler=web_search_tool
 )
 
+# Register Red Hat content creation tool
+try:
+    from redhat_content_creator import RedHatContentCreator
+    REDHAT_CONTENT_AVAILABLE = True
+    
+    # Initialize content creator
+    _content_creator = RedHatContentCreator()
+    
+    def create_redhat_content_tool(arguments: Dict) -> Dict:
+        """Create Red Hat training content (lectures, GEs, lab scripts)"""
+        try:
+            user_request = arguments.get("request", "")
+            output_dir = arguments.get("output_directory", "/home/dallas/dev/au0025l-demo")
+            
+            # Parse the request
+            parsed = _content_creator.parse_content_request(user_request)
+            
+            # Create all requested content
+            results = _content_creator.create_all_content(
+                topic=parsed["topic"],
+                output_dir=output_dir,
+                course_id=parsed["course_id"],
+                content_types=parsed["content_types"]
+            )
+            
+            # Format results
+            result_text = f"Created Red Hat content for '{parsed['topic']}':\n\n"
+            result_text += f"Content Types: {', '.join(parsed['content_types'])}\n"
+            result_text += f"Output Directory: {output_dir}\n"
+            result_text += f"Course ID: {parsed['course_id']}\n\n"
+            result_text += "Files Created:\n"
+            
+            for content_type, paths in results.items():
+                if isinstance(paths, dict):
+                    result_text += f"\n{content_type.upper()}:\n"
+                    for key, path in paths.items():
+                        result_text += f"  - {key}: {path}\n"
+                else:
+                    result_text += f"  - {content_type}: {paths}\n"
+            
+            return {
+                "content": [{"type": "text", "text": result_text}],
+                "isError": False,
+                "files_created": results,
+                "parsed_request": parsed
+            }
+        except Exception as e:
+            return {
+                "content": [{"type": "text", "text": f"Error creating Red Hat content: {str(e)}"}],
+                "isError": True
+            }
+    
+    register_tool(
+        name="create_redhat_content",
+        description="Create Red Hat training content including lectures, Guided Exercises (GEs), and lab scripts (dynolabs). Parses natural language requests like 'create a lecture and GE on Ansible Roles' and generates all required files following Red Hat content standards.",
+        parameters={
+            "request": {
+                "type": "string",
+                "description": "Natural language request describing what content to create (e.g., 'create a lecture and GE on Ansible Roles Create in /home/dallas/dev/au0025l-demo')"
+            },
+            "output_directory": {
+                "type": "string",
+                "description": "Output directory for created content (default: /home/dallas/dev/au0025l-demo)",
+                "default": "/home/dallas/dev/au0025l-demo"
+            }
+        },
+        handler=create_redhat_content_tool
+    )
+except ImportError:
+    REDHAT_CONTENT_AVAILABLE = False
+    print("Warning: Red Hat content creator not available")
+
 # Load custom tools from mcp_tools directory
 try:
     import sys
