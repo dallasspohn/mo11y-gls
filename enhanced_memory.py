@@ -176,9 +176,9 @@ class EnhancedMemory:
         
         cursor.execute("""
             INSERT INTO episodic_memories 
-            (content, context, importance_score, emotional_valence, emotional_arousal, tags, relationship_context)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (content, context, importance, emotional_valence, emotional_arousal, tags_str, relationship_context))
+            (content, context, importance_score, tags, relationship_context)
+            VALUES (?, ?, ?, ?, ?)
+        """, (content, context, importance, tags_str, relationship_context))
         
         memory_id = cursor.lastrowid
         conn.commit()
@@ -202,21 +202,7 @@ class EnhancedMemory:
         conn.commit()
         conn.close()
     
-    def remember_emotion(self, emotion_type: str, intensity: float, 
-                        context: str = "", trigger: str = "",
-                        memory_id: Optional[int] = None):
-        """Store an emotional memory"""
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-        
-        cursor.execute("""
-            INSERT INTO emotional_memories 
-            (emotion_type, intensity, context, trigger, memory_id)
-            VALUES (?, ?, ?, ?, ?)
-        """, (emotion_type, intensity, context, trigger, memory_id))
-        
-        conn.commit()
-        conn.close()
+    # Note: remember_emotion method removed - this is a business tool
     
     def add_milestone(self, milestone_type: str, description: str, 
                      significance: float = 0.5, associated_memories: List[int] = None):
@@ -466,11 +452,7 @@ class EnhancedMemory:
                 'timestamp': m[2],
                 'significance': m[3]
             } for m in milestones],
-            'emotional_patterns': [{
-                'emotion': e[0],
-                'avg_intensity': e[1],
-                'frequency': e[2]
-            } for e in emotional_patterns],
+            'emotional_patterns': [],  # Removed - this is a business tool
             'preferences_learned': preferences_count
         }
     
@@ -765,7 +747,7 @@ class EnhancedMemory:
         # Delete in order (respecting foreign keys)
         cursor.execute("DELETE FROM memory_associations")
         cursor.execute("DELETE FROM media_memories")
-        cursor.execute("DELETE FROM emotional_memories")
+        # Note: Emotional memories table removed - this is a business tool
         cursor.execute("DELETE FROM semantic_memories")
         cursor.execute("DELETE FROM conversation_patterns")
         cursor.execute("DELETE FROM relationship_milestones")
@@ -828,8 +810,8 @@ class EnhancedMemory:
         cursor.execute(f"DELETE FROM media_memories WHERE memory_id IN ({placeholders})", memory_ids)
         counts['media'] = cursor.rowcount
         
-        cursor.execute(f"DELETE FROM emotional_memories WHERE memory_id IN ({placeholders})", memory_ids)
-        counts['emotional'] = cursor.rowcount
+        # Note: Emotional memories deletion removed - this is a business tool
+        counts['emotional'] = 0
         
         cursor.execute(f"DELETE FROM semantic_memories WHERE source_memory_id IN ({placeholders})", memory_ids)
         counts['semantic'] = cursor.rowcount
