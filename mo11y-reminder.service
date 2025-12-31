@@ -1,0 +1,21 @@
+[Unit]
+Description=Mo11y Reminder Service - Calendar reminders and notifications
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=dallas
+Group=dallas
+WorkingDirectory=/home/dallas/mo11y
+Environment="PATH=/usr/local/bin:/usr/bin:/bin:/home/dallas/.local/bin"
+Environment="REMINDER_CHECK_INTERVAL=60"
+Environment="MO11Y_DB_PATH=/home/dallas/mo11y/SPOHNZ.db"
+ExecStart=/usr/bin/python3 /home/dallas/mo11y/reminder_service.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

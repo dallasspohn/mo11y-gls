@@ -1,0 +1,20 @@
+[Unit]
+Description=Mo11y Local MCP Server
+After=network.target
+
+[Service]
+Type=simple
+User=dallas
+Group=dallas
+WorkingDirectory=/home/dallas/mo11y
+Environment="PATH=/home/dallas/venv/bin:/usr/local/bin:/usr/bin:/bin"
+ExecStart=/home/dallas/venv/bin/python /home/dallas/mo11y/local_mcp_server.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+
+

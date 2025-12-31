@@ -1,0 +1,9 @@
+{
+    "sonas_dir": "./sonas/",
+    "rags_dir": "./RAGs/",
+    "db_path": "./mo11y_companion.db",
+    "model_name": "deepseek-r1:latest",
+    "dev_mode": false,
+    "suppress_thinking": true,
+    "mcp_server_url": "http://localhost:8443"
+}

@@ -1,0 +1,14 @@
+{
+    "filename": "example",
+    "description": "Example RAG file - replace with your own knowledge base",
+    "personal_data": {
+        "name": "Your Name",
+        "family_members": []
+    },
+    "years": [],
+    "friends": [],
+    "work_history": [],
+    "education": [],
+    "interests": [],
+    "notes": "This is a template RAG file. Replace with your own personal data."
+}
