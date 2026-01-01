@@ -95,3 +95,4 @@ Thumbs.db
 telegram_bot.log
 test_complete_setup.txt
 diagnose_services.txt
+token.json
