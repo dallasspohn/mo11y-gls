@@ -1425,7 +1425,7 @@ elif page == "📊 Relationship":
         st.metric("Milestones", len(relationship_summary["milestones"]))
     with col4:
         # Note: Emotional patterns removed - this is a business tool
-            st.metric("Dominant Emotion", dominant_emotion["emotion"].title())
+        pass
     
     st.markdown("---")
     
@@ -1466,20 +1466,7 @@ elif page == "📊 Relationship":
     else:
         st.info("No milestones yet. Keep chatting to build our relationship! 💝")
     
-    # Emotional patterns
-    st.subheader("😊 Emotional Patterns")
-    emotional_patterns = relationship_summary.get("emotional_patterns", [])
-    if emotional_patterns:
-        df_emotions = pd.DataFrame(emotional_patterns)
-        fig = px.pie(
-            df_emotions,
-            values="frequency",
-            names="emotion",
-            title="Emotional Distribution"
-        )
-        st.plotly_chart(fig, use_container_width=True)
-    else:
-        st.info("Emotional patterns will emerge as we interact more.")
+    # Note: Emotional patterns section removed - this is a business tool
     
     # Timeline visualizations
     st.subheader("📈 Interaction Timeline")

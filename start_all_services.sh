@@ -85,22 +85,24 @@ fi
 
 # 1. Start MCP Server (must start first)
 echo -e "${GREEN}📡 Starting MCP Server...${NC}"
-MCP_DIR="/home/dallas/molly"
-if [ ! -d "$MCP_DIR" ]; then
-    echo -e "${RED}❌ MCP directory not found: $MCP_DIR${NC}"
-    echo "   Skipping MCP server..."
+# Use venv from current directory if it exists, otherwise try system Python
+if [ -f "$SCRIPT_DIR/.venv/bin/python" ]; then
+    PYTHON_CMD="$SCRIPT_DIR/.venv/bin/python"
+elif [ -f "/home/dallas/venv/bin/python" ]; then
+    PYTHON_CMD="/home/dallas/venv/bin/python"
 else
-    cd "$MCP_DIR"
-    if [ -f "/home/dallas/venv/bin/python" ]; then
-        /home/dallas/venv/bin/python local_mcp_server.py > "$LOG_DIR/mcp_server.log" 2>&1 &
-        MCP_PID=$!
-        echo "$MCP_PID" > "$PID_DIR/mcp_server.pid"
-        echo "  ✅ MCP Server started (PID: $MCP_PID)"
-        sleep 3  # Give MCP server time to start
-    else
-        echo -e "${RED}❌ Python venv not found at /home/dallas/venv/bin/python${NC}"
-        echo "   Skipping MCP server..."
-    fi
+    PYTHON_CMD="python3"
+fi
+
+if [ -f "$SCRIPT_DIR/local_mcp_server.py" ]; then
+    cd "$SCRIPT_DIR"
+    $PYTHON_CMD local_mcp_server.py > "$LOG_DIR/mcp_server.log" 2>&1 &
+    MCP_PID=$!
+    echo "$MCP_PID" > "$PID_DIR/mcp_server.pid"
+    echo "  ✅ MCP Server started (PID: $MCP_PID)"
+    sleep 3  # Give MCP server time to start
+else
+    echo -e "${YELLOW}⚠️  local_mcp_server.py not found, skipping MCP server...${NC}"
 fi
 cd "$SCRIPT_DIR"
 echo ""
@@ -108,7 +110,7 @@ echo ""
 # 2. Start Reminder Service
 echo -e "${GREEN}⏰ Starting Reminder Service...${NC}"
 if [ -f "$SCRIPT_DIR/reminder_service.py" ]; then
-    python3 "$SCRIPT_DIR/reminder_service.py" > "$LOG_DIR/reminder_service.log" 2>&1 &
+    $PYTHON_CMD "$SCRIPT_DIR/reminder_service.py" > "$LOG_DIR/reminder_service.log" 2>&1 &
     REMINDER_PID=$!
     echo "$REMINDER_PID" > "$PID_DIR/reminder_service.pid"
     echo "  ✅ Reminder Service started (PID: $REMINDER_PID)"
@@ -121,7 +123,7 @@ echo ""
 # 3. Start Telegram Bot
 echo -e "${GREEN}💬 Starting Telegram Bot...${NC}"
 if [ -f "$SCRIPT_DIR/telegram_bot_service.py" ]; then
-    python3 "$SCRIPT_DIR/telegram_bot_service.py" > "$LOG_DIR/telegram_bot.log" 2>&1 &
+    $PYTHON_CMD "$SCRIPT_DIR/telegram_bot_service.py" > "$LOG_DIR/telegram_bot.log" 2>&1 &
     TELEGRAM_PID=$!
     echo "$TELEGRAM_PID" > "$PID_DIR/telegram_bot.pid"
     echo "  ✅ Telegram Bot started (PID: $TELEGRAM_PID)"
@@ -134,20 +136,19 @@ echo ""
 # 4. Start Streamlit (depends on MCP server)
 echo -e "${GREEN}🌐 Starting Streamlit...${NC}"
 if [ -f "$SCRIPT_DIR/app_enhanced.py" ]; then
-    if [ -f "/home/dallas/venv/bin/streamlit" ]; then
-        /home/dallas/venv/bin/streamlit run "$SCRIPT_DIR/app_enhanced.py" > "$LOG_DIR/streamlit.log" 2>&1 &
-        STREAMLIT_PID=$!
-        echo "$STREAMLIT_PID" > "$PID_DIR/streamlit.pid"
-        echo "  ✅ Streamlit started (PID: $STREAMLIT_PID)"
-        sleep 2
+    # Use venv from current directory if it exists
+    if [ -f "$SCRIPT_DIR/.venv/bin/streamlit" ]; then
+        STREAMLIT_CMD="$SCRIPT_DIR/.venv/bin/streamlit"
+    elif [ -f "/home/dallas/venv/bin/streamlit" ]; then
+        STREAMLIT_CMD="/home/dallas/venv/bin/streamlit"
     else
-        echo -e "${RED}❌ Streamlit not found at /home/dallas/venv/bin/streamlit${NC}"
-        echo "   Trying with system streamlit..."
-        streamlit run "$SCRIPT_DIR/app_enhanced.py" > "$LOG_DIR/streamlit.log" 2>&1 &
-        STREAMLIT_PID=$!
-        echo "$STREAMLIT_PID" > "$PID_DIR/streamlit.pid"
-        echo "  ✅ Streamlit started (PID: $STREAMLIT_PID)"
+        STREAMLIT_CMD="streamlit"
     fi
+    $STREAMLIT_CMD run "$SCRIPT_DIR/app_enhanced.py" > "$LOG_DIR/streamlit.log" 2>&1 &
+    STREAMLIT_PID=$!
+    echo "$STREAMLIT_PID" > "$PID_DIR/streamlit.pid"
+    echo "  ✅ Streamlit started (PID: $STREAMLIT_PID)"
+    sleep 2
 else
     echo -e "${RED}❌ app_enhanced.py not found${NC}"
 fi

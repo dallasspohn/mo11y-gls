@@ -363,8 +363,8 @@ class EnhancedMemory:
                 'content': row[2],
                 'context': row[3],
                 'importance_score': row[4],
-                'tags': json.loads(row[7]) if row[7] else [],
-                'relationship_context': row[8]
+                'tags': json.loads(row[5]) if len(row) > 5 and row[5] else [],
+                'relationship_context': row[6] if len(row) > 6 else None
             })
         
         conn.close()
