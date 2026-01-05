@@ -87,7 +87,7 @@ check_service() {
 
 check_service "mcp_server" "📡 MCP Server"
 check_service "reminder_service" "⏰ Reminder Service"
-check_service "telegram_bot" "💬 Telegram Bot"
+check_service "slack_bot" "💬 Slack Bot"
 check_service "streamlit" "🌐 Streamlit"
 
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -97,5 +97,5 @@ echo ""
 echo "To view logs in real-time:"
 echo "  tail -f $LOG_DIR/mcp_server.log"
 echo "  tail -f $LOG_DIR/reminder_service.log"
-echo "  tail -f $LOG_DIR/telegram_bot.log"
+echo "  tail -f $LOG_DIR/slack_bot.log"
 echo "  tail -f $LOG_DIR/streamlit.log"

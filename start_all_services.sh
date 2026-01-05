@@ -1,6 +1,6 @@
 #!/bin/bash
 # Start All Mo11y Services (without systemd)
-# Starts Telegram bot, MCP server, Reminder service, and Streamlit in background
+# Starts Slack bot (or optional Telegram bot), MCP server, Reminder service, and Streamlit in background
 
 set -e
 
@@ -61,25 +61,29 @@ export MO11Y_CONFIG_PATH="${MO11Y_CONFIG_PATH:-$SCRIPT_DIR/config.json}"
 export REMINDER_CHECK_INTERVAL="${REMINDER_CHECK_INTERVAL:-60}"
 export MO11Y_DB_PATH="${MO11Y_DB_PATH:-$SCRIPT_DIR/mo11y_companion.db}"
 
-# Check for Telegram bot token
-if [ -z "$TELEGRAM_BOT_TOKEN" ]; then
+# Check for Slack bot token (primary)
+if [ -z "$SLACK_BOT_TOKEN" ]; then
     if [ -f "$MO11Y_CONFIG_PATH" ]; then
         # Try to extract from config.json
-        TELEGRAM_BOT_TOKEN=$(python3 -c "import json; print(json.load(open('$MO11Y_CONFIG_PATH')).get('telegram', {}).get('bot_token', ''))" 2>/dev/null || echo "")
+        SLACK_BOT_TOKEN=$(python3 -c "import json; print(json.load(open('$MO11Y_CONFIG_PATH')).get('slack', {}).get('bot_token', ''))" 2>/dev/null || echo "")
     fi
-    if [ -z "$TELEGRAM_BOT_TOKEN" ]; then
-        echo -e "${YELLOW}⚠️  TELEGRAM_BOT_TOKEN not set. Telegram bot may not start properly.${NC}"
+    if [ -z "$SLACK_BOT_TOKEN" ]; then
+        echo -e "${YELLOW}⚠️  SLACK_BOT_TOKEN not set. Slack bot may not start properly.${NC}"
+        echo -e "${YELLOW}   Note: Telegram is also supported as an optional alternative.${NC}"
     else
-        export TELEGRAM_BOT_TOKEN
+        export SLACK_BOT_TOKEN
     fi
 fi
 
-if [ -z "$TELEGRAM_USER_ID" ]; then
+if [ -z "$SLACK_CHANNEL_ID" ] && [ -z "$SLACK_USER_ID" ]; then
     if [ -f "$MO11Y_CONFIG_PATH" ]; then
-        TELEGRAM_USER_ID=$(python3 -c "import json; print(json.load(open('$MO11Y_CONFIG_PATH')).get('telegram', {}).get('user_id', ''))" 2>/dev/null || echo "")
+        SLACK_CHANNEL_ID=$(python3 -c "import json; print(json.load(open('$MO11Y_CONFIG_PATH')).get('slack', {}).get('channel_id', ''))" 2>/dev/null || echo "")
+        SLACK_USER_ID=$(python3 -c "import json; print(json.load(open('$MO11Y_CONFIG_PATH')).get('slack', {}).get('user_id', ''))" 2>/dev/null || echo "")
     fi
-    if [ -n "$TELEGRAM_USER_ID" ]; then
-        export TELEGRAM_USER_ID
+    if [ -n "$SLACK_CHANNEL_ID" ]; then
+        export SLACK_CHANNEL_ID
+    elif [ -n "$SLACK_USER_ID" ]; then
+        export SLACK_USER_ID
     fi
 fi
 
@@ -120,16 +124,23 @@ else
 fi
 echo ""
 
-# 3. Start Telegram Bot
-echo -e "${GREEN}💬 Starting Telegram Bot...${NC}"
-if [ -f "$SCRIPT_DIR/telegram_bot_service.py" ]; then
+# 3. Start Slack Bot (or optional Telegram Bot)
+echo -e "${GREEN}💬 Starting Slack Bot...${NC}"
+if [ -f "$SCRIPT_DIR/slack_bot_service.py" ]; then
+    $PYTHON_CMD "$SCRIPT_DIR/slack_bot_service.py" > "$LOG_DIR/slack_bot.log" 2>&1 &
+    SLACK_PID=$!
+    echo "$SLACK_PID" > "$PID_DIR/slack_bot.pid"
+    echo "  ✅ Slack Bot started (PID: $SLACK_PID)"
+    sleep 1
+elif [ -f "$SCRIPT_DIR/telegram_bot_service.py" ]; then
+    echo -e "${YELLOW}⚠️  Slack bot not found, trying optional Telegram bot...${NC}"
     $PYTHON_CMD "$SCRIPT_DIR/telegram_bot_service.py" > "$LOG_DIR/telegram_bot.log" 2>&1 &
     TELEGRAM_PID=$!
     echo "$TELEGRAM_PID" > "$PID_DIR/telegram_bot.pid"
     echo "  ✅ Telegram Bot started (PID: $TELEGRAM_PID)"
     sleep 1
 else
-    echo -e "${RED}❌ telegram_bot_service.py not found${NC}"
+    echo -e "${YELLOW}⚠️  No bot service found (slack_bot_service.py or telegram_bot_service.py)${NC}"
 fi
 echo ""
 
@@ -182,7 +193,7 @@ check_service() {
 
 check_service "mcp_server"
 check_service "reminder_service"
-check_service "telegram_bot"
+check_service "slack_bot"
 check_service "streamlit"
 
 echo ""
@@ -191,7 +202,7 @@ echo ""
 echo "📝 Logs are available in: $LOG_DIR/"
 echo "   - mcp_server.log"
 echo "   - reminder_service.log"
-echo "   - telegram_bot.log"
+echo "   - slack_bot.log"
 echo "   - streamlit.log"
 echo ""
 echo "🛑 To stop all services, run:"

@@ -32,6 +32,7 @@ ISSUES=()
 
 echo -e "${CYAN}╔════════════════════════════════════════════════════════════╗${NC}"
 echo -e "${CYAN}║     Mo11y Complete Setup Test - Post-Reboot Check       ║${NC}"
+echo -e "${CYAN}║     GOOD ONLY IF SERVICES ARE INSTALLED                 ║${NC}"
 echo -e "${CYAN}╚════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
@@ -125,7 +126,7 @@ else
         log_info "  Fix: sudo ./install_reminder_service.sh"
     fi
     check_systemd_service "mo11y-streamlit.service" "Streamlit App"
-    check_systemd_service "mo11y-telegram-bot.service" "Telegram Bot"
+    check_systemd_service "mo11y-slack-bot.service" "Slack Bot"
 fi
 
 echo ""
@@ -171,7 +172,7 @@ check_file "reminder_service.py" "Reminder Service"
 check_file "task_service.py" "Task Service"
 check_file "enhanced_memory.py" "Enhanced Memory"
 check_file "local_mcp_server.py" "MCP Server"
-check_file "telegram_bot_service.py" "Telegram Bot Service"
+check_file "slack_bot_service.py" "Slack Bot Service"
 
 # Directories
 check_dir "conversation_logs" "Conversation logs directory"
@@ -352,9 +353,9 @@ try:
     conn.close()
     print(f"TOTAL_COUNT:{total}")
     
-    # Test Telegram notification function exists
-    from reminder_service import send_telegram_notification
-    print("TELEGRAM_FUNC_OK")
+    # Test Slack notification function exists
+    from reminder_service import send_slack_notification
+    print("SLACK_FUNC_OK")
     
     print("SUCCESS")
 except Exception as e:
@@ -372,8 +373,8 @@ if echo "$REMINDER_TEST" | grep -q "SUCCESS"; then
         REMINDER_ID=$(echo "$REMINDER_TEST" | grep "ADD_OK" | cut -d: -f2)
         log_pass "Reminder Service can add reminders (ID: $REMINDER_ID)"
     fi
-    if echo "$REMINDER_TEST" | grep -q "TELEGRAM_FUNC_OK"; then
-        log_pass "Telegram notification function available"
+    if echo "$REMINDER_TEST" | grep -q "SLACK_FUNC_OK"; then
+        log_pass "Slack notification function available"
     fi
     PENDING_COUNT=$(echo "$REMINDER_TEST" | grep "PENDING_COUNT" | cut -d: -f2)
     TOTAL_COUNT=$(echo "$REMINDER_TEST" | grep "TOTAL_COUNT" | cut -d: -f2)

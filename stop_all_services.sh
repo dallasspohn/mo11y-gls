@@ -26,7 +26,7 @@ is_running() {
 }
 
 # Stop services in reverse order
-SERVICES=("streamlit" "telegram_bot" "reminder_service" "mcp_server")
+SERVICES=("streamlit" "slack_bot" "reminder_service" "mcp_server")
 STOPPED=0
 FAILED=0
 

@@ -103,8 +103,8 @@ class ReminderService:
         conn.close()
 
 
-def send_telegram_notification(title: str, description: str, reminder_time: str, db_path: str):
-    """Send reminder notification via Telegram"""
+def send_slack_notification(title: str, description: str, reminder_time: str, db_path: str):
+    """Send reminder notification via Slack (with optional Telegram fallback)"""
     try:
         # Try multiple config paths
         config_paths = [
@@ -126,32 +126,99 @@ def send_telegram_notification(title: str, description: str, reminder_time: str,
                 break
         
         if not config:
-            logger.warning("No config.json found - cannot send Telegram notification")
+            logger.warning("No config.json found - cannot send Slack notification")
             logger.info(f"Searched paths: {config_paths}")
             return False
         
-        # Try multiple ways to get Telegram credentials
-        # Check nested telegram object first
-        telegram_config = config.get('telegram', {})
-        bot_token = (telegram_config.get('bot_token') or
-                    config.get('telegram_bot_token') or 
-                    config.get('TELEGRAM_BOT_TOKEN') or
-                    os.getenv('TELEGRAM_BOT_TOKEN'))
-        user_id = (telegram_config.get('user_id') or
-                  config.get('telegram_user_id') or 
-                  config.get('TELEGRAM_USER_ID') or
-                  os.getenv('TELEGRAM_USER_ID'))
+        # Try Slack first (primary)
+        slack_config = config.get('slack', {})
+        bot_token = (slack_config.get('bot_token') or
+                    config.get('slack_bot_token') or 
+                    config.get('SLACK_BOT_TOKEN') or
+                    os.getenv('SLACK_BOT_TOKEN'))
+        channel_id = (slack_config.get('channel_id') or
+                     slack_config.get('user_id') or
+                     config.get('slack_channel_id') or 
+                     config.get('SLACK_CHANNEL_ID') or
+                     os.getenv('SLACK_CHANNEL_ID') or
+                     os.getenv('SLACK_USER_ID'))
+        
+        # If Slack not configured, try Telegram as optional fallback
+        if not bot_token or not channel_id:
+            logger.info("Slack not configured, trying Telegram as optional fallback...")
+            telegram_config = config.get('telegram', {})
+            bot_token = (telegram_config.get('bot_token') or
+                        config.get('telegram_bot_token') or 
+                        config.get('TELEGRAM_BOT_TOKEN') or
+                        os.getenv('TELEGRAM_BOT_TOKEN'))
+            channel_id = (telegram_config.get('user_id') or
+                         telegram_config.get('chat_id') or
+                         config.get('telegram_user_id') or 
+                         config.get('TELEGRAM_USER_ID') or
+                         os.getenv('TELEGRAM_USER_ID'))
+            
+            if bot_token and channel_id:
+                logger.info("Using Telegram as fallback notification method")
+                return _send_telegram_notification(title, description, reminder_time, bot_token, channel_id)
         
         if not bot_token:
-            logger.warning("No Telegram bot token found in config or environment")
-            logger.info("Looking for: telegram_bot_token, TELEGRAM_BOT_TOKEN, or TELEGRAM_BOT_TOKEN env var")
+            logger.warning("No Slack bot token found in config or environment")
+            logger.info("Looking for: slack.bot_token, SLACK_BOT_TOKEN, or SLACK_BOT_TOKEN env var")
+            logger.info("Note: Telegram is also supported as an optional alternative")
             return False
         
-        if not user_id:
-            logger.warning("No Telegram user ID found in config or environment")
-            logger.info("Looking for: telegram_user_id, TELEGRAM_USER_ID, or TELEGRAM_USER_ID env var")
+        if not channel_id:
+            logger.warning("No Slack channel ID found in config or environment")
+            logger.info("Looking for: slack.channel_id, SLACK_CHANNEL_ID, or SLACK_CHANNEL_ID env var")
+            logger.info("Note: Telegram is also supported as an optional alternative")
             return False
         
+        logger.info(f"Sending Slack notification to channel: {channel_id}")
+        
+        message = f"🔔 *Reminder: {title}*\n"
+        if description:
+            message += f"{description}\n"
+        message += f"\nDue: {reminder_time}"
+        
+        api_url = "https://slack.com/api/chat.postMessage"
+        payload = {
+            'channel': channel_id,
+            'text': message
+        }
+        
+        headers = {
+            'Authorization': f'Bearer {bot_token}',
+            'Content-Type': 'application/json'
+        }
+        
+        logger.debug(f"Slack API URL: {api_url}")
+        logger.debug(f"Channel: {channel_id}")
+        
+        response = requests.post(api_url, json=payload, headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            result = response.json()
+            if result.get('ok'):
+                logger.info(f"✅ Slack notification sent successfully for: {title}")
+                return True
+            else:
+                logger.error(f"❌ Slack API returned error: {result.get('error', 'Unknown error')}")
+                return False
+        else:
+            logger.error(f"❌ Failed to send Slack notification: HTTP {response.status_code}")
+            logger.error(f"Response: {response.text}")
+            return False
+            
+    except Exception as e:
+        logger.error(f"❌ Error sending Slack notification: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return False
+
+
+def _send_telegram_notification(title: str, description: str, reminder_time: str, bot_token: str, user_id: str):
+    """Internal helper to send Telegram notification (optional fallback)"""
+    try:
         logger.info(f"Sending Telegram notification to user_id: {user_id}")
         
         message = f"🔔 **Reminder: {title}**\n"
@@ -365,13 +432,13 @@ def main():
                         
                         logger.info(f"📢 Processing reminder: {title} (ID: {reminder_id}) - Due: {reminder_time}")
                         
-                        # Send Telegram notification
-                        logger.info(f"  → Sending Telegram notification...")
+                        # Send Slack notification (with optional Telegram fallback)
+                        logger.info(f"  → Sending Slack notification...")
                         try:
-                            send_telegram_notification(title, description, reminder_time, db_path)
-                            logger.info(f"  ✅ Telegram notification sent successfully")
+                            send_slack_notification(title, description, reminder_time, db_path)
+                            logger.info(f"  ✅ Slack notification sent successfully")
                         except Exception as e:
-                            logger.error(f"  ❌ Failed to send Telegram notification: {e}")
+                            logger.error(f"  ❌ Failed to send Slack notification: {e}")
                             import traceback
                             logger.error(traceback.format_exc())
                         

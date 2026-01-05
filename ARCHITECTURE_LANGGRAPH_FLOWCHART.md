@@ -253,7 +253,7 @@ flowchart TB
     
     subgraph "User Interfaces"
         Streamlit[Streamlit UI<br/>app_enhanced.py<br/>- Chat Interface<br/>- Relationship Stats<br/>- Memory Vault<br/>- Settings]
-        Telegram[Telegram Bot<br/>telegram_bot.py<br/>- Real-time Messaging<br/>- Persona Support]
+        Slack[Slack Bot<br/>slack_bot.py<br/>- Real-time Messaging<br/>- Persona Support]
     end
     
     Agent --> State
@@ -283,14 +283,14 @@ flowchart TB
     Ollama --> Models
     
     Streamlit --> Agent
-    Telegram --> Agent
+    Slack --> Agent
     
     style Agent fill:#e3f2fd
     style Memory fill:#f3e5f5
     style Personality fill:#fff3e0
     style Ollama fill:#e8f5e9
     style Streamlit fill:#fce4ec
-    style Telegram fill:#fce4ec
+    style Slack fill:#fce4ec
 ```
 
 ## Data Flow Architecture
@@ -298,7 +298,7 @@ flowchart TB
 ```mermaid
 sequenceDiagram
     participant User
-    participant UI as Streamlit/Telegram
+    participant UI as Streamlit/Slack
     participant Agent as Mo11yAgent
     participant Memory as EnhancedMemory
     participant Personality as CompanionPersonality

@@ -1,0 +1,22 @@
+[Unit]
+Description=Mo11y Slack Bot - Connect Alex to Slack
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=dallas
+Group=dallas
+WorkingDirectory=/home/dallas/mo11y
+Environment="PATH=/home/dallas/venv/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="SLACK_BOT_TOKEN=xoxb-your-slack-bot-token-here"
+Environment="SLACK_CHANNEL_ID=your-channel-id-here"
+Environment="MO11Y_CONFIG_PATH=/home/dallas/mo11y/config.json"
+ExecStart=/home/dallas/venv/bin/python /home/dallas/mo11y/slack_bot_service.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

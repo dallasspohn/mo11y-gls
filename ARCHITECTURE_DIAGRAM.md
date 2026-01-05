@@ -6,11 +6,11 @@
 ┌─────────────────────────────────────────────────────────────────┐
 │                         USER INTERFACES                          │
 ├─────────────────────────────────────────────────────────────────┤
-│  Streamlit UI (app_enhanced.py)  │  Telegram Bot (telegram_bot.py) │
-│  - Chat Interface                │  - Telegram Integration      │
+│  Streamlit UI (app_enhanced.py)  │  Slack Bot (slack_bot.py) │
+│  - Chat Interface                │  - Slack Integration      │
 │  - Relationship Stats            │  - Real-time Messaging       │
 │  - Memory Vault                  │  - Persona Support           │
-│  - Settings                      │                              │
+│  - Settings                      │  (Telegram optional)         │
 └─────────────────────────────────────────────────────────────────┘
                               │
                               ▼
@@ -270,7 +270,7 @@ Response to User
 ┌─────────────────────────────────────────────────────────────┐
 │                    FRONTEND                                 │
 │  - Streamlit (Web UI)                                      │
-│  - Telegram Bot API                                        │
+│  - Slack Bot API (Telegram optional)                       │
 └─────────────────────────────────────────────────────────────┘
          │
          ▼
@@ -321,7 +321,7 @@ mo11y/
 │
 ├── Interfaces
 │   ├── app_enhanced.py         # Streamlit UI
-│   └── telegram_bot.py        # Telegram integration
+│   └── slack_bot.py           # Slack integration (Telegram optional)
 │
 └── Configuration
     ├── config.json             # Main config

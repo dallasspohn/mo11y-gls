@@ -8,7 +8,7 @@ import json
 import os
 import sys
 from datetime import datetime
-from reminder_service import ReminderService, send_telegram_notification, trigger_alarm_script, trigger_ping_script, open_flashing_webpage
+from reminder_service import ReminderService, send_slack_notification, trigger_alarm_script, trigger_ping_script, open_flashing_webpage
 
 # Get database path from config
 config_path = "config.json"
@@ -43,14 +43,14 @@ for reminder in pending:
     print(f"📢 Processing reminder: {title} (ID: {reminder_id})")
     print(f"   Due: {reminder_time}\n")
     
-    # Send Telegram notification
-    print("  → Sending Telegram notification...")
+    # Send Slack notification (with optional Telegram fallback)
+    print("  → Sending Slack notification...")
     try:
-        success = send_telegram_notification(title, description, reminder_time, db_path)
+        success = send_slack_notification(title, description, reminder_time, db_path)
         if success:
-            print("  ✅ Telegram notification sent successfully")
+            print("  ✅ Slack notification sent successfully")
         else:
-            print("  ❌ Telegram notification failed")
+            print("  ❌ Slack notification failed")
     except Exception as e:
         print(f"  ❌ Error: {e}")
     
