@@ -256,6 +256,103 @@ if OLLAMA_AVAILABLE:
         },
         handler=example_ollama_chat_tool
     )
+    
+    # Add Ollama management tools
+    def ollama_list_models_tool(arguments: Dict) -> Dict:
+        """List available Ollama models"""
+        try:
+            models_response = ollama_list()
+            models_list = []
+            if isinstance(models_response, dict):
+                models_list = models_response.get("models", [])
+            elif isinstance(models_response, list):
+                models_list = models_response
+            
+            model_names = []
+            for m in models_list:
+                if isinstance(m, dict):
+                    name = m.get("name") or m.get("model", "")
+                elif isinstance(m, str):
+                    name = m
+                else:
+                    name = str(m)
+                if name:
+                    model_names.append(name)
+            
+            if not model_names:
+                return {
+                    "content": [{"type": "text", "text": "No models found. Use 'ollama pull <model-name>' to download models."}],
+                    "isError": False
+                }
+            
+            return {
+                "content": [{"type": "text", "text": f"Available Ollama models:\n" + "\n".join(f"  - {name}" for name in model_names)}],
+                "isError": False
+            }
+        except Exception as e:
+            return {
+                "content": [{"type": "text", "text": f"Error listing models: {str(e)}"}],
+                "isError": True
+            }
+    
+    def ollama_pull_model_tool(arguments: Dict) -> Dict:
+        """Pull/download an Ollama model"""
+        try:
+            import subprocess
+            model_name = arguments.get("model", "")
+            if not model_name:
+                return {
+                    "content": [{"type": "text", "text": "Error: 'model' parameter is required (e.g., 'deepseek-r1:latest')"}],
+                    "isError": True
+                }
+            
+            # Use subprocess to call ollama pull
+            result = subprocess.run(
+                ["ollama", "pull", model_name],
+                capture_output=True,
+                text=True,
+                timeout=3600  # 1 hour timeout for large models
+            )
+            
+            if result.returncode == 0:
+                return {
+                    "content": [{"type": "text", "text": f"Successfully pulled model: {model_name}\n{result.stdout}"}],
+                    "isError": False
+                }
+            else:
+                return {
+                    "content": [{"type": "text", "text": f"Error pulling model: {result.stderr or result.stdout}"}],
+                    "isError": True
+                }
+        except subprocess.TimeoutExpired:
+            return {
+                "content": [{"type": "text", "text": f"Timeout: Model pull is taking too long. This is normal for large models. Check progress with: ollama list"}],
+                "isError": True
+            }
+        except Exception as e:
+            return {
+                "content": [{"type": "text", "text": f"Error: {str(e)}"}],
+                "isError": True
+            }
+    
+    register_tool(
+        name="ollama_list_models",
+        description="List all available Ollama models",
+        parameters={},
+        handler=ollama_list_models_tool
+    )
+    
+    register_tool(
+        name="ollama_pull_model",
+        description="Pull/download an Ollama model (e.g., 'deepseek-r1:latest')",
+        parameters={
+            "model": {
+                "type": "string",
+                "description": "Model name to pull (e.g., 'deepseek-r1:latest', 'llama3.2:3b')"
+            }
+        },
+        handler=ollama_pull_model_tool
+    )
 
 # Register web search tool
 register_tool(

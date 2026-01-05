@@ -68,9 +68,16 @@ class MCPToolExecutor:
                         # If content is a list, get first item
                         if isinstance(content, list) and len(content) > 0:
                             content = content[0]
-                        # If content is dict, extract values
+                        # If content is dict, extract text field if present
                         if isinstance(content, dict):
-                            output = content
+                            # Check for "text" field first (most common in file_reader responses)
+                            if "text" in content:
+                                output = content["text"]
+                            elif "type" in content and content.get("type") == "text" and "text" in content:
+                                output = content["text"]
+                            else:
+                                # Return the dict itself, let caller extract
+                                output = content
                         else:
                             output = content
                     # Check for direct fields (like image_path from our tool)
@@ -79,13 +86,19 @@ class MCPToolExecutor:
                     else:
                         output = result
                 
+                # Check if there's an error flag
+                is_error = False
+                if isinstance(result, dict):
+                    is_error = result.get("isError", False)
+                
                 # Return result with all fields preserved
                 return {
-                    "success": True,
+                    "success": True and not is_error,
                     "output": output,
-                    "isError": result.get("isError", False) if isinstance(result, dict) else False,
+                    "isError": is_error,
+                    "error": result.get("error") if isinstance(result, dict) and is_error else None,
                     # Preserve all fields from result (like image_path)
-                    **({k: v for k, v in result.items() if isinstance(result, dict)})
+                    **({k: v for k, v in result.items() if isinstance(result, dict) and k not in ["success", "output", "isError", "error"]})
                 }
             else:
                 return {

@@ -1,0 +1,329 @@
+{
+  "version": "1.0.0",
+  "description": "Configuration file mapping all available Red Hat content creation tasks and resources from redhat-content-standards repository",
+  "standards_repo": "https://github.com/dallasspohn/redhat-content-standards.git",
+  
+  "content_types": {
+    "lecture": {
+      "name": "Lecture",
+      "description": "Instructional content that teaches concepts and provides background information",
+      "instruction_file": "instructions/lectures.md",
+      "template_file": "templates/lecture-template.adoc",
+      "examples": [
+        "examples/lecture-sample.adoc",
+        "examples/lecture-sample0.adoc",
+        "examples/lecture-sample1.adoc",
+        "examples/lecture-sample2.adoc"
+      ],
+      "output_extension": ".adoc",
+      "keywords": [
+        "lecture",
+        "lectures",
+        "lesson",
+        "lessons",
+        "instructional content"
+      ]
+    },
+    "guided-exercise": {
+      "name": "Guided Exercise (GE)",
+      "description": "Step-by-step exercises with detailed instructions and solutions. Students follow along with provided solutions",
+      "instruction_file": "instructions/guided-exercises.md",
+      "template_file": "templates/ge-template.adoc",
+      "examples": [
+        "examples/ge-sample.adoc",
+        "examples/ge-sample0.adoc",
+        "examples/ge-sample1.adoc",
+        "examples/ge-sample2.adoc",
+        "examples/ge_finish.adoc"
+      ],
+      "output_extension": ".adoc",
+      "keywords": [
+        "ge",
+        "guided exercise",
+        "guided exercises",
+        "guided-exercise",
+        "guided-exercises",
+        "exercise",
+        "exercises"
+      ],
+      "related_docs": [
+        "GE-numbering-patterns.md",
+        "GE-mistakes.md",
+        "COLLECTIONS_GE_README.md"
+      ]
+    },
+    "dynolab": {
+      "name": "Dynolab",
+      "description": "Lab infrastructure components including Python scripts, Ansible playbooks, and lab materials",
+      "instruction_file": "instructions/dynolabs.md",
+      "template_file": null,
+      "examples": [
+        "classroom.structure/"
+      ],
+      "output_structure": "classroom.structure/",
+      "keywords": [
+        "dynolab",
+        "dynolabs",
+        "lab",
+        "labs",
+        "lab script",
+        "lab scripts",
+        "infrastructure",
+        "ansible",
+        "playbook",
+        "playbooks"
+      ],
+      "related_docs": [
+        "dynolabs-system-structure.md",
+        "ansible-module-updates.md"
+      ],
+      "components": {
+        "python_scripts": "Lab control scripts",
+        "ansible_playbooks": "Setup and cleanup playbooks",
+        "lab_materials": "Inventory files, config files, solutions",
+        "ansible_navigator_config": "ansible-navigator.yml configuration"
+      }
+    },
+    "peer-review": {
+      "name": "Peer Review",
+      "description": "Comprehensive peer review instructions covering all content types (Lectures, GEs, Labs, Dynolabs)",
+      "instruction_file": "instructions/peer-review.md",
+      "template_file": null,
+      "examples": [
+        "peer-review-checklist.md"
+      ],
+      "keywords": [
+        "peer review",
+        "review",
+        "checklist",
+        "quality assurance",
+        "qa"
+      ],
+      "related_docs": [
+        "peer-review-checklist.md"
+      ]
+    }
+  },
+  
+  "style_guides": {
+    "asciidoc_formatting": {
+      "path": "style-guides/asciidoc-formatting.md",
+      "description": "AsciiDoc formatting standards and rules"
+    },
+    "content_structure": {
+      "path": "style-guides/content-structure.md",
+      "description": "Content structure requirements and organization guidelines"
+    },
+    "writing_style": {
+      "path": "style-guides/writing-style.md",
+      "description": "Writing guidelines and best practices"
+    }
+  },
+  
+  "templates": {
+    "lecture": {
+      "path": "templates/lecture-template.adoc",
+      "content_type": "lecture"
+    },
+    "guided_exercise": {
+      "path": "templates/ge-template.adoc",
+      "content_type": "guided-exercise"
+    }
+  },
+  
+  "course_instructions": {
+    "ansible_automation_platform": {
+      "path": "course-instructions/ansible-automation-platform.md",
+      "description": "Course-specific instructions for Ansible Automation Platform"
+    }
+  },
+  
+  "standards_documents": {
+    "ge_numbering_patterns": {
+      "path": "GE-numbering-patterns.md",
+      "description": "Guided Exercise numbering patterns and conventions"
+    },
+    "ge_mistakes": {
+      "path": "GE-mistakes.md",
+      "description": "Common mistakes to avoid in Guided Exercises"
+    },
+    "collections_ge_readme": {
+      "path": "COLLECTIONS_GE_README.md",
+      "description": "Collections Guided Exercise README and guidelines"
+    },
+    "dynolabs_system_structure": {
+      "path": "dynolabs-system-structure.md",
+      "description": "Dynolabs system structure and organization"
+    },
+    "ansible_module_updates": {
+      "path": "ansible-module-updates.md",
+      "description": "Ansible module update guidelines"
+    },
+    "peer_review_checklist": {
+      "path": "peer-review-checklist.md",
+      "description": "Peer review checklist for content quality assurance"
+    },
+    "au0026l_system_process_ge_standards": {
+      "path": "au0026l-system-process-ge-standards.md",
+      "description": "AU0026L System Process GE standards"
+    }
+  },
+  
+  "examples": {
+    "lectures": [
+      "examples/lecture-sample.adoc",
+      "examples/lecture-sample0.adoc",
+      "examples/lecture-sample1.adoc",
+      "examples/lecture-sample2.adoc"
+    ],
+    "guided_exercises": [
+      "examples/ge-sample.adoc",
+      "examples/ge-sample0.adoc",
+      "examples/ge-sample1.adoc",
+      "examples/ge-sample2.adoc",
+      "examples/ge_finish.adoc"
+    ],
+    "checklist_items": {
+      "path": "examples/checklist-items.md",
+      "description": "Example checklist items for content"
+    },
+    "classroom_structure": {
+      "path": "classroom.structure/",
+      "description": "Complete classroom structure examples including grading, labs, and solutions"
+    }
+  },
+  
+  "task_mappings": {
+    "create_lecture": {
+      "content_type": "lecture",
+      "instruction_file": "instructions/lectures.md",
+      "template_file": "templates/lecture-template.adoc",
+      "style_guides": [
+        "style-guides/asciidoc-formatting.md",
+        "style-guides/content-structure.md",
+        "style-guides/writing-style.md"
+      ],
+      "examples": [
+        "examples/lecture-sample.adoc",
+        "examples/lecture-sample0.adoc",
+        "examples/lecture-sample1.adoc",
+        "examples/lecture-sample2.adoc"
+      ]
+    },
+    "create_guided_exercise": {
+      "content_type": "guided-exercise",
+      "instruction_file": "instructions/guided-exercises.md",
+      "template_file": "templates/ge-template.adoc",
+      "style_guides": [
+        "style-guides/asciidoc-formatting.md",
+        "style-guides/content-structure.md",
+        "style-guides/writing-style.md"
+      ],
+      "standards": [
+        "GE-numbering-patterns.md",
+        "GE-mistakes.md",
+        "COLLECTIONS_GE_README.md"
+      ],
+      "examples": [
+        "examples/ge-sample.adoc",
+        "examples/ge-sample0.adoc",
+        "examples/ge-sample1.adoc",
+        "examples/ge-sample2.adoc",
+        "examples/ge_finish.adoc"
+      ]
+    },
+    "create_dynolab": {
+      "content_type": "dynolab",
+      "instruction_file": "instructions/dynolabs.md",
+      "style_guides": [
+        "style-guides/asciidoc-formatting.md",
+        "style-guides/content-structure.md"
+      ],
+      "standards": [
+        "dynolabs-system-structure.md",
+        "ansible-module-updates.md"
+      ],
+      "examples": [
+        "classroom.structure/"
+      ]
+    },
+    "create_lab": {
+      "content_type": "dynolab",
+      "instruction_file": "instructions/dynolabs.md",
+      "standards": [
+        "dynolabs-system-structure.md"
+      ],
+      "examples": [
+        "classroom.structure/"
+      ]
+    },
+    "peer_review_content": {
+      "content_type": "peer-review",
+      "instruction_file": "instructions/peer-review.md",
+      "standards": [
+        "peer-review-checklist.md"
+      ],
+      "examples": [
+        "peer-review-checklist.md"
+      ]
+    }
+  },
+  
+  "file_structure": {
+    "lecture": {
+      "base_name": "{topic-slug}",
+      "extension": ".adoc",
+      "location": "lectures/"
+    },
+    "guided_exercise": {
+      "base_name": "{course-id}-{topic-slug}-ge",
+      "extension": ".adoc",
+      "location": "guided-exercises/"
+    },
+    "dynolab": {
+      "base_structure": "classroom.structure/grading/src/<course-id>/materials/labs/{lab-name}/",
+      "components": {
+        "python_scripts": "*.py",
+        "ansible_playbooks": "*.yml",
+        "ansible_navigator": "ansible-navigator.yml",
+        "solutions": "solutions/",
+        "inventory": "inventory",
+        "group_vars": "group_vars/"
+      }
+    }
+  },
+  
+  "validation_rules": {
+    "asciidoc": {
+      "required_sections": [
+        "title",
+        "metadata"
+      ],
+      "formatting_rules": "style-guides/asciidoc-formatting.md"
+    },
+    "ge": {
+      "required_sections": [
+        "title",
+        "metadata",
+        "objectives",
+        "instructions",
+        "solutions"
+      ],
+      "numbering_pattern": "GE-numbering-patterns.md"
+    },
+    "dynolab": {
+      "required_components": [
+        "python_script",
+        "ansible_playbook",
+        "ansible_navigator_config"
+      ],
+      "structure_requirements": "dynolabs-system-structure.md"
+    }
+  },
+  
+  "usage": {
+    "description": "This configuration file maps all available tasks and resources from the redhat-content-standards repository",
+    "integration": "Used by redhat_content_creator.py to understand available content types, instructions, templates, and standards",
+    "auto_update": "When auto_pull is enabled in config.json, this repository is automatically updated before content creation"
+  }
+}

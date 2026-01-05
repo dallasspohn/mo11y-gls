@@ -1,5 +1,5 @@
 """
-Mo11y Enhanced - A Lifelong Companion
+Mo11y Enhanced - Your Business Assistant
 Streamlit interface with LangGraph agent integration
 """
 
@@ -27,21 +27,157 @@ from relationship_timeline import RelationshipTimeline
 
 # Page config
 st.set_page_config(
-    page_title="Mo11y - Your Lifelong Companion",
-    page_icon="💝",
+    page_title="Mo11y - Your Business Assistant",
+    page_icon="💼",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for a more intimate, companion-like feel
-st.markdown("""
+# Configuration (load before CSS to check dev_mode)
+@st.cache_resource
+def load_config():
+    config_path = "config.json"
+    
+    # Get base directory (where script is running)
+    base_dir = os.path.dirname(os.path.abspath(__file__)) if "__file__" in globals() else os.getcwd()
+    
+    # Default config with relative paths (can be overridden by env vars or config.json)
+    default_config = {
+        "sonas_dir": os.getenv("MO11Y_SONAS_DIR", os.path.join(base_dir, "sonas")),
+        "rags_dir": os.getenv("MO11Y_RAGS_DIR", os.path.join(base_dir, "RAGs")),
+        "texts_dir": os.getenv("MO11Y_TEXTS_DIR", os.path.join(base_dir, "text")),
+        "db_path": os.getenv("MO11Y_DB_PATH", os.path.join(base_dir, "mo11y_companion.db")),
+        "model_name": os.getenv("MO11Y_MODEL_NAME", "deepseek-r1:latest"),
+    }
+    
+    # Normalize paths (expand relative paths, ensure trailing slashes for dirs)
+    for key in ["sonas_dir", "rags_dir", "texts_dir"]:
+        if default_config[key] and not os.path.isabs(default_config[key]):
+            default_config[key] = os.path.abspath(default_config[key])
+        if not default_config[key].endswith(os.sep):
+            default_config[key] += os.sep
+    
+    if os.path.exists(config_path):
+        try:
+            with open(config_path, "r") as f:
+                user_config = json.load(f)
+                # Merge user config, but normalize paths
+                merged_config = {**default_config, **user_config}
+                
+                # Normalize paths from user config
+                for key in ["sonas_dir", "rags_dir", "texts_dir"]:
+                    if key in merged_config and merged_config[key]:
+                        if not os.path.isabs(merged_config[key]):
+                            merged_config[key] = os.path.abspath(merged_config[key])
+                        if not merged_config[key].endswith(os.sep):
+                            merged_config[key] += os.sep
+                
+                return merged_config
+        except:
+            return default_config
+    return default_config
+
+CONFIG = load_config()
+DEV_MODE = CONFIG.get("dev_mode", False)
+
+# Custom CSS - Red Hat theme if dev_mode is enabled
+css_theme = """
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap');
     
     * {
         font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', 'EmojiOne Color', 'Twemoji Mozilla', 'Segoe UI Symbol', sans-serif;
     }
-    
+"""
+
+# Apply Red Hat theme if dev_mode is enabled
+if DEV_MODE:
+    css_theme += """
+    .main {
+        background: linear-gradient(135deg, #CC0000 0%, #A30000 100%);
+    }
+    .stApp {
+        background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%);
+    }
+    .companion-message {
+        background: linear-gradient(135deg, #CC0000 0%, #A30000 100%);
+        padding: 1rem;
+        border-radius: 15px;
+        color: white;
+        margin: 1rem 0;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        word-wrap: break-word;
+    }
+    .user-message {
+        background: linear-gradient(135deg, #EE0000 0%, #CC0000 100%);
+        padding: 1rem;
+        border-radius: 15px;
+        color: white;
+        margin: 1rem 0;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .milestone-card {
+        background: white;
+        padding: 1rem;
+        border-radius: 10px;
+        border-left: 4px solid #CC0000;
+        margin: 0.5rem 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .memory-card {
+        background: #FFEBEE;
+        padding: 0.75rem;
+        border-radius: 8px;
+        margin: 0.5rem 0;
+        border-left: 3px solid #CC0000;
+    }
+    h1 {
+        color: #CC0000;
+        text-align: center;
+    }
+    .companion-message ul,
+    .companion-message ol {
+        margin: 0.75rem 0;
+        padding-left: 2rem;
+        list-style-position: outside;
+        display: block;
+    }
+    .companion-message ul {
+        list-style-type: disc;
+    }
+    .companion-message ol {
+        list-style-type: decimal;
+    }
+    .companion-message li {
+        margin: 0.5rem 0;
+        display: list-item;
+        line-height: 1.5;
+    }
+    .companion-message p {
+        margin: 0.75rem 0;
+        line-height: 1.6;
+    }
+    .companion-message p:first-child {
+        margin-top: 0;
+    }
+    .companion-message p:last-child {
+        margin-bottom: 0;
+    }
+    .companion-message br {
+        display: block;
+        content: "";
+        margin: 0.5rem 0;
+    }
+    .relationship-stats {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin: 1rem 0;
+    }
+"""
+else:
+    css_theme += """
     .main {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
@@ -125,60 +261,28 @@ st.markdown("""
         margin: 1rem 0;
     }
 </style>
-""", unsafe_allow_html=True)
+"""
 
-# Configuration
-@st.cache_resource
-def load_config():
-    config_path = "config.json"
-    
-    # Get base directory (where script is running)
-    base_dir = os.path.dirname(os.path.abspath(__file__)) if "__file__" in globals() else os.getcwd()
-    
-    # Default config with relative paths (can be overridden by env vars or config.json)
-    default_config = {
-        "sonas_dir": os.getenv("MO11Y_SONAS_DIR", os.path.join(base_dir, "sonas")),
-        "rags_dir": os.getenv("MO11Y_RAGS_DIR", os.path.join(base_dir, "RAGs")),
-        "texts_dir": os.getenv("MO11Y_TEXTS_DIR", os.path.join(base_dir, "text")),
-        "db_path": os.getenv("MO11Y_DB_PATH", os.path.join(base_dir, "mo11y_companion.db")),
-        "model_name": os.getenv("MO11Y_MODEL_NAME", "deepseek-r1:latest"),
-    }
-    
-    # Normalize paths (expand relative paths, ensure trailing slashes for dirs)
-    for key in ["sonas_dir", "rags_dir", "texts_dir"]:
-        if default_config[key] and not os.path.isabs(default_config[key]):
-            default_config[key] = os.path.abspath(default_config[key])
-        if not default_config[key].endswith(os.sep):
-            default_config[key] += os.sep
-    
-    if os.path.exists(config_path):
-        try:
-            with open(config_path, "r") as f:
-                user_config = json.load(f)
-                # Merge user config, but normalize paths
-                merged_config = {**default_config, **user_config}
-                
-                # Normalize paths from user config
-                for key in ["sonas_dir", "rags_dir", "texts_dir"]:
-                    if key in merged_config and merged_config[key]:
-                        if not os.path.isabs(merged_config[key]):
-                            merged_config[key] = os.path.abspath(merged_config[key])
-                        if not merged_config[key].endswith(os.sep):
-                            merged_config[key] += os.sep
-                
-                return merged_config
-        except:
-            return default_config
-    return default_config
-
-CONFIG = load_config()
+st.markdown(css_theme, unsafe_allow_html=True)
 
 # Helper function to get all available sona files
 def get_available_sonas():
     """Get list of all available sona files"""
     # Get base directory for fallback
-    base_dir = os.path.dirname(os.path.abspath(__file__)) if "__file__" in globals() else os.getcwd()
+    try:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+    except NameError:
+        base_dir = os.getcwd()
+    
     sonas_dir = CONFIG.get("sonas_dir", os.path.join(base_dir, "sonas"))
+    
+    # Normalize path - handle relative paths
+    if not os.path.isabs(sonas_dir):
+        sonas_dir = os.path.abspath(os.path.join(base_dir, sonas_dir))
+    # Remove trailing slash if present
+    if sonas_dir.endswith(os.sep):
+        sonas_dir = sonas_dir.rstrip(os.sep)
+    
     sonas = {}
     
     if os.path.exists(sonas_dir):
@@ -193,14 +297,9 @@ def get_available_sonas():
                     
                     # Check for persona image
                     image_path = None
-                    # Get base directory for path resolution
-                    try:
-                        base_dir = os.path.dirname(os.path.abspath(__file__))
-                    except NameError:
-                        base_dir = os.getcwd()
                     
                     # Check if image_path is specified in sona file
-                    if "image_path" in sona_data:
+                    if "image_path" in sona_data and sona_data.get("image_path"):
                         image_path = sona_data["image_path"]
                         # If relative path, make it relative to project root
                         if not os.path.isabs(image_path):
@@ -221,12 +320,23 @@ def get_available_sonas():
                         "description": sona_data.get("description", ""),
                         "image_path": image_path if image_path and os.path.exists(image_path) else None
                     }
+                except json.JSONDecodeError as e:
+                    # Log JSON errors for debugging but skip the file
+                    print(f"Warning: Invalid JSON in {filename}: {e}")
+                    continue
                 except Exception as e:
-                    # Skip invalid JSON files
+                    # Log other errors for debugging but skip the file
+                    print(f"Warning: Error loading {filename}: {e}")
                     continue
     
     # Sort by name
-    return dict(sorted(sonas.items()))
+    result = dict(sorted(sonas.items()))
+    # Debug: print loaded personas (remove after debugging)
+    if not result:
+        print(f"DEBUG: No sonas loaded. sonas_dir={sonas_dir}, exists={os.path.exists(sonas_dir)}")
+    else:
+        print(f"DEBUG: Loaded {len(result)} personas: {list(result.keys())}")
+    return result
 
 # Initialize agent (cached with persona key)
 # Helper function to get spinner message based on persona/model
@@ -432,8 +542,8 @@ with st.sidebar:
                         st.title("💋 Izzy-Chan")
                         st.caption("Sassy & Flirtatious")
                     elif persona_name == "Mo11y":
-                        st.title("💝 Mo11y")
-                        st.caption("Your Lifelong Companion")
+                        st.title("💼 Mo11y")
+                        st.caption("Your Business Assistant")
                     else:
                         st.title(f"🎭 {persona_name}")
             else:
@@ -445,8 +555,8 @@ with st.sidebar:
                     st.title("💋 Izzy-Chan")
                     st.caption("Sassy & Flirtatious")
                 elif persona_name == "Mo11y":
-                    st.title("💝 Mo11y")
-                    st.caption("Your Lifelong Companion")
+                    st.title("💼 Mo11y")
+                    st.caption("Your Business Assistant")
                 else:
                     st.title(f"🎭 {persona_name}")
             
@@ -514,7 +624,7 @@ if page == "💬 Chat":
         st.markdown("*Sassy, confident, and flirtatious*")
     elif persona_name == "Mo11y" or selected_persona_name == "Mo11y":
         st.title("💬 Chat with Mo11y")
-        st.markdown("*Your lifelong companion who grows with you*")
+        st.markdown("*Your professional business assistant*")
     else:
         st.title(f"💬 Chat with {persona_name}")
         # Get description from available sonas
@@ -665,7 +775,7 @@ if page == "💬 Chat":
         with col2:
             st.write("")  # Spacing
         
-        submitted = st.form_submit_button("Send 💝", use_container_width=True)
+        submitted = st.form_submit_button("Send 💼", use_container_width=True)
     
     if submitted and (user_input or uploaded_files):
         persona_name = st.session_state.get("current_persona", "Mo11y")
@@ -1452,7 +1562,7 @@ elif page == "📊 Relationship":
         st.plotly_chart(fig, use_container_width=True)
     
     # Milestones
-    st.subheader("💝 Relationship Milestones")
+    st.subheader("💼 Relationship Milestones")
     milestones = relationship_summary.get("milestones", [])
     if milestones:
         for milestone in milestones[:10]:  # Show last 10
@@ -1464,7 +1574,7 @@ elif page == "📊 Relationship":
             </div>
             """, unsafe_allow_html=True)
     else:
-        st.info("No milestones yet. Keep chatting to build our relationship! 💝")
+        st.info("No milestones yet. Keep chatting to build our relationship! 💼")
     
     # Note: Emotional patterns section removed - this is a business tool
     
@@ -1542,7 +1652,7 @@ elif page == "🧠 Memories":
                     st.caption(f"Type: {media['media_type']} | Size: {media.get('file_size', 0)} bytes")
     
     if not memories:
-        st.info("No memories found. Start chatting to create memories! 💝")
+        st.info("No memories found. Start chatting to create memories! 💼")
     
     # Memory consolidation
     st.markdown("---")
@@ -1984,6 +2094,6 @@ elif page == "⚙️ Settings":
 # Footer
 st.markdown("---")
 st.markdown(
-    "<div style='text-align: center; color: #667eea;'>💝 Mo11y - Growing with you, every day 💝</div>",
+    "<div style='text-align: center; color: #667eea;'>💼 Mo11y - Your Business Assistant 💼</div>",
     unsafe_allow_html=True
 )

@@ -182,8 +182,17 @@ class Mo11yAgent:
                     mcp_url = docker_url
             
             if mcp_url or mcp_path:
+                print(f"DEBUG [MCP INIT]: Initializing MCP client with URL: {mcp_url}, Path: {mcp_path}")
                 self.mcp_client = MCPClient(mcp_server_url=mcp_url, mcp_server_path=mcp_path)
                 self.mcp_executor = MCPToolExecutor(self.mcp_client)
+                # Test connection
+                try:
+                    tools = self.mcp_client.list_tools()
+                    print(f"DEBUG [MCP INIT]: Successfully connected! Found {len(tools)} tools")
+                except Exception as e:
+                    print(f"DEBUG [MCP INIT]: Connection test failed: {e}")
+            else:
+                print("DEBUG [MCP INIT]: No MCP URL or path found. MCP disabled.")
         
     def _build_graph(self):
         """Build the LangGraph workflow"""
@@ -499,7 +508,24 @@ class Mo11yAgent:
             context_parts.append("CRITICAL REMINDER: Use ONLY the information provided below. DO NOT make up, invent, or guess facts. If information is not provided, say 'I don't have that information' rather than guessing.")
             context_parts.append("DO NOT generate academic essays, random stories, or unrelated content. Stay focused on being a helpful personal assistant.")
             context_parts.append("\nMOST IMPORTANT: Always prioritize what the user JUST said in the 'CURRENT USER MESSAGE' section. If the user just told you something, use that information - do NOT rely on old memories if they conflict.")
-            context_parts.append("\nFORMATTING: Always use proper markdown formatting. For lists, use '- ' for each item and put each item on its own line with a line break after it. Use double line breaks between paragraphs. Example:\n- Item 1\n- Item 2\n\nNot: - Item 1 - Item 2")
+            context_parts.append("\nFORMATTING REQUIREMENTS:")
+            context_parts.append("- Use proper markdown formatting with clear structure")
+            context_parts.append("- Use headings (##, ###) to organize sections when explaining multiple concepts")
+            context_parts.append("- For lists, use '- ' for each item, each on its own line with proper spacing")
+            context_parts.append("- Use double line breaks between paragraphs and sections")
+            context_parts.append("- For code examples, use proper code blocks with language specification")
+            context_parts.append("- Format examples clearly with proper indentation and spacing")
+            context_parts.append("- Use bold (**text**) for emphasis on key terms or important points")
+            context_parts.append("- Structure responses like: Brief intro → Clear explanation → Examples if needed → Summary")
+            context_parts.append("\nExample of good formatting:")
+            context_parts.append("## Section Title")
+            context_parts.append("\nBrief introduction explaining the concept.\n")
+            context_parts.append("- Point 1 with clear explanation")
+            context_parts.append("- Point 2 with clear explanation")
+            context_parts.append("\n```language")
+            context_parts.append("code example here")
+            context_parts.append("```\n")
+            context_parts.append("**Key takeaway:** Summary point")
             context_parts.append("=" * 80)
             context_parts.append("\n\nCONTEXT FROM OUR RELATIONSHIP:")
         elif use_modelfile:
@@ -511,7 +537,15 @@ class Mo11yAgent:
             context_parts.append(personality_context)
             context_parts.append("\n\nCRITICAL: Use ONLY the information provided below. DO NOT make up or invent facts. If information is not provided, say you don't have that information rather than guessing.")
             context_parts.append("\nMOST IMPORTANT: Always prioritize what the user JUST said in the 'CURRENT USER MESSAGE' section. If the user just told you something, use that information - do NOT rely on old memories if they conflict.")
-            context_parts.append("\nFORMATTING: Always use proper markdown formatting. For lists, use '- ' for each item and put each item on its own line with a line break after it. Use double line breaks between paragraphs.")
+            context_parts.append("\nFORMATTING REQUIREMENTS:")
+            context_parts.append("- Use proper markdown formatting with clear structure")
+            context_parts.append("- Use headings (##, ###) to organize sections when explaining multiple concepts")
+            context_parts.append("- For lists, use '- ' for each item, each on its own line with proper spacing")
+            context_parts.append("- Use double line breaks between paragraphs and sections")
+            context_parts.append("- For code examples, use proper code blocks with language specification")
+            context_parts.append("- Format examples clearly with proper indentation and spacing")
+            context_parts.append("- Use bold (**text**) for emphasis on key terms or important points")
+            context_parts.append("- Structure responses like: Brief intro → Clear explanation → Examples if needed → Summary")
         
         # CRITICAL: Add CURRENT user input FIRST - this is what the user JUST said
         # This must be prioritized over everything else
@@ -808,7 +842,11 @@ class Mo11yAgent:
         # Add MCP tools context
         web_search_results = None
         if self.mcp_executor:
-            tools_summary = self.mcp_executor.get_available_tools_summary()
+            try:
+                tools_summary = self.mcp_executor.get_available_tools_summary()
+            except Exception as e:
+                print(f"DEBUG [MCP TOOLS]: Error getting tools summary: {e}")
+                tools_summary = "MCP tools available but connection issue"
             if tools_summary:
                 context_parts.append(f"\n{tools_summary}")
                 context_parts.append("\nIMPORTANT: If the user asks for current information, news, or anything that requires up-to-date web data, use the 'web_search' tool automatically.")
@@ -850,6 +888,8 @@ class Mo11yAgent:
             has_domain = any(ext in user_input_lower for ext in [".com", ".org", ".net", ".io", ".edu", ".gov"])
             if has_domain:
                 needs_search = True
+            
+            print(f"DEBUG [WEB SEARCH]: needs_search={needs_search}, has_domain={has_domain}, mcp_executor={self.mcp_executor is not None}")
             
             # Check if weather query but weather API not available - use web search as fallback
             weather_keywords = ["weather", "temperature", "forecast", "rain", "snow", 
@@ -901,7 +941,6 @@ class Mo11yAgent:
                 # If still the full input and has domain, extract domain or key phrase
                 if search_query == user_input and has_domain:
                     # Try to extract domain name
-                    import re
                     domain_match = re.search(r'\b[\w-]+\.(?:com|org|net|io|edu|gov|co|uk|us)\b', user_input, re.IGNORECASE)
                     if domain_match:
                         domain = domain_match.group(0)
@@ -937,7 +976,6 @@ class Mo11yAgent:
                 if search_query and len(search_query) > 3:
                     # Ensure site: prefix is added if domain detected and user wants site search
                     if has_domain and "site:" not in search_query.lower():
-                        import re
                         domain_match = re.search(r'\b[\w-]+\.(?:com|org|net|io|edu|gov|co|uk|us)\b', search_query, re.IGNORECASE)
                         if domain_match and ("search" in user_input_lower or user_input_lower.strip().endswith(domain_match.group(0).lower())):
                             domain = domain_match.group(0)
@@ -951,33 +989,282 @@ class Mo11yAgent:
                     # mcp_tools_used already initialized above
                     try:
                         # Call web search tool
+                        print(f"DEBUG [WEB SEARCH]: Calling web_search with query: {search_query}")
                         search_result = self.mcp_executor.execute_tool(
                             "web_search",
                             {"query": search_query, "max_results": 5},
                             context={"user_query": user_input}
                         )
                         
-                        if search_result and search_result.get("success") and search_result.get("output"):
-                            web_search_results = search_result.get("output")
-                            context_parts.append(f"\n\nWEB SEARCH RESULTS (use this information to answer the user's question - cite sources when relevant):\n{web_search_results}")
-                            mcp_tools_used.append(f"web_search: {search_query}")
+                        print(f"DEBUG [WEB SEARCH RESULT]: success={search_result.get('success') if search_result else False}, has_output={bool(search_result and search_result.get('output'))}")
+                        print(f"DEBUG [WEB SEARCH RESULT DETAIL]: {search_result}")
+                        
+                        if search_result and search_result.get("success"):
+                            web_search_output = search_result.get("output")
+                            # Handle both string and dict outputs
+                            if isinstance(web_search_output, dict):
+                                # Extract text from dict if needed
+                                web_search_output = web_search_output.get("text", str(web_search_output))
+                            
+                            if web_search_output:
+                                web_search_results = str(web_search_output)
+                                context_parts.append(f"\n\nWEB SEARCH RESULTS (use this information to answer the user's question - cite sources when relevant):\n{web_search_results}")
+                                mcp_tools_used.append(f"web_search: {search_query}")
+                                print(f"DEBUG [WEB SEARCH]: Successfully added search results to context ({len(web_search_results)} chars)")
+                            else:
+                                print(f"DEBUG [WEB SEARCH]: Search succeeded but output is empty. Result: {search_result}")
+                        else:
+                            print(f"DEBUG [WEB SEARCH]: Search failed or returned no results. Result: {search_result}")
                     except Exception as e:
                         # If tool call fails, continue without search results
-                        print(f"Web search error: {e}")
+                        print(f"DEBUG [WEB SEARCH ERROR]: {e}")
+                        import traceback
+                        traceback.print_exc()
             
-            # Auto-detect and execute Red Hat content creation if needed
+            # Auto-detect Red Hat style guide questions and load relevant guides
+            style_guide_keywords = [
+                "style guide", "styleguide", "style-guide",
+                "callout", "callouts", "admonition", "admonitions",
+                "asciidoc", "ascii doc", "ascii-doc",
+                "formatting", "format", "syntax",
+                "lecture", "ge", "guided exercise", "dynolab", "lab",
+                "red hat content", "redhat content", "training content",
+                "how do i", "how to", "how can i", "what is the", "what are the",
+                "code block", "code blocks", "source code", "listing"
+            ]
+            
+            needs_style_guide = any(keyword in user_input_lower for keyword in style_guide_keywords)
+            
+            # Load Red Hat style guides if question is about content standards
+            if needs_style_guide:
+                style_guides_context = self._load_redhat_style_guides()
+                if style_guides_context:
+                    context_parts.append("\n" + "="*80)
+                    context_parts.append("RED HAT CONTENT STANDARDS & STYLE GUIDES:")
+                    context_parts.append("="*80)
+                    context_parts.append(style_guides_context)
+                    context_parts.append("="*80 + "\n")
+                    print(f"DEBUG [STYLE GUIDES]: Loaded Red Hat style guides for question about: {user_input[:100]}")
+            
+            # Auto-detect and execute Red Hat content creation/update if needed
             redhat_content_keywords = [
                 "create a lecture", "create lecture", "make a lecture", "generate lecture",
                 "create a ge", "create ge", "create guided exercise", "make a ge",
                 "create lab", "create lab script", "create dynolab", "create dynolabs",
                 "red hat content", "redhat content", "training content",
                 "create lecture and ge", "create lecture and lab", "create ge and lab",
-                "lecture on", "ge on", "lab on", "guided exercise on"
+                "lecture on", "ge on", "lab on", "guided exercise on",
+                "review.*lecture", "update.*lecture", "review.*ge", "update.*ge",
+                "review.*lab", "update.*lab", "fix.*lecture", "fix.*ge"
             ]
             
-            needs_redhat_content = any(keyword in user_input_lower for keyword in redhat_content_keywords)
+            # Check for Red Hat content keywords using regex patterns
+            needs_redhat_content = False
+            for keyword in redhat_content_keywords:
+                if re.search(keyword, user_input_lower):
+                    needs_redhat_content = True
+                    break
             
-            if needs_redhat_content and self.mcp_executor:
+            # Check if this is a review/update request (has file path)
+            is_review_update = any(keyword in user_input_lower for keyword in ["review", "update", "fix"]) and any(keyword in user_input_lower for keyword in ["lecture", "ge", "lab", ".adoc"])
+            
+            print(f"DEBUG [DETECTION]: is_review_update={is_review_update}, mcp_executor={self.mcp_executor is not None}")
+            
+            # Handle review/update requests
+            if is_review_update and self.mcp_executor:
+                print(f"DEBUG [REDHAT CONTENT]: Red Hat content review/update detected!")
+                try:
+                    # Extract file path from user input
+                    file_path = None
+                    path_patterns = [
+                        r"(?:at|in|file|path)[:\s]+([^\s]+\.adoc)",
+                        r"([^\s]+\.adoc)",
+                        r"(\.\.?/[\w/]+\.adoc)",
+                        r"(/[\w/]+\.adoc)"
+                    ]
+                    for pattern in path_patterns:
+                        match = re.search(pattern, user_input, re.IGNORECASE)
+                        if match:
+                            file_path = match.group(1).strip()
+                            # Resolve relative paths
+                            if file_path.startswith("../") or file_path.startswith("./"):
+                                # If path starts with ../dev, resolve from home directory
+                                if file_path.startswith("../dev"):
+                                    # Resolve relative to home directory
+                                    home_dir = os.path.expanduser("~")
+                                    # Remove ../ and join with home directory
+                                    file_path = file_path.replace("../dev", "dev", 1)
+                                    file_path = os.path.join(home_dir, file_path)
+                                    file_path = os.path.abspath(file_path)
+                                else:
+                                    # Resolve relative to current working directory
+                                    file_path = os.path.abspath(file_path)
+                            elif not os.path.isabs(file_path):
+                                # Relative path without ../
+                                file_path = os.path.abspath(file_path)
+                            
+                            # Normalize the path
+                            file_path = os.path.normpath(file_path)
+                            break
+                    
+                    print(f"DEBUG [FILE PATH]: Extracted path: {file_path}, exists: {os.path.exists(file_path) if file_path else False}")
+                    
+                    if file_path:
+                        # Read the file using MCP file_reader tool if available
+                        try:
+                            print(f"DEBUG [MCP TOOL]: Calling file_reader with filename: {file_path}")
+                            file_result = self.mcp_executor.execute_tool(
+                                "file_reader",
+                                {"filename": file_path},  # Use "filename" not "file_path"
+                                context={"user_query": user_input}
+                            )
+                            
+                            print(f"DEBUG [MCP RESULT]: {file_result}")
+                            
+                            if file_result and file_result.get("success") and not file_result.get("isError"):
+                                # Extract content from result - handle multiple possible formats
+                                output = file_result.get("output", {})
+                                content_text = None
+                                
+                                # Format 1: Direct text string
+                                if isinstance(output, str):
+                                    content_text = output
+                                # Format 2: Dict with content field
+                                elif isinstance(output, dict):
+                                    # Check for MCP format: {"content": [{"type": "text", "text": ...}]}
+                                    if "content" in output:
+                                        content_list = output["content"]
+                                        if isinstance(content_list, list) and len(content_list) > 0:
+                                            content_item = content_list[0]
+                                            if isinstance(content_item, dict):
+                                                # Extract text field
+                                                content_text = content_item.get("text", str(content_item))
+                                            else:
+                                                content_text = str(content_item)
+                                        else:
+                                            content_text = str(content_list)
+                                    # Check for direct text field
+                                    elif "text" in output:
+                                        content_text = output["text"]
+                                    # Check if output itself is the content (nested structure)
+                                    elif isinstance(output, dict) and len(output) == 1 and "text" in list(output.values())[0]:
+                                        content_text = list(output.values())[0]["text"]
+                                    else:
+                                        # Try to find any text-like field
+                                        for key in ["text", "content", "data", "file_content"]:
+                                            if key in output:
+                                                val = output[key]
+                                                if isinstance(val, str):
+                                                    content_text = val
+                                                    break
+                                                elif isinstance(val, list) and len(val) > 0:
+                                                    if isinstance(val[0], dict) and "text" in val[0]:
+                                                        content_text = val[0]["text"]
+                                                        break
+                                    # Last resort: convert to string
+                                    if not content_text:
+                                        content_text = str(output)
+                                else:
+                                    content_text = str(output)
+                                
+                                if not content_text:
+                                    raise ValueError("Could not extract content from file_reader result")
+                                
+                                # Load style guides
+                                style_guides_context = self._load_redhat_style_guides()
+                                
+                                # Add file content and style guides to context for review
+                                context_parts.append("\n" + "="*80)
+                                context_parts.append("FILE TO REVIEW AND UPDATE:")
+                                context_parts.append("="*80)
+                                context_parts.append(f"File Path: {file_path}\n")
+                                context_parts.append("File Content:")
+                                context_parts.append("-" * 80)
+                                context_parts.append(content_text)
+                                context_parts.append("-" * 80)
+                                
+                                if style_guides_context:
+                                    context_parts.append("\n" + "="*80)
+                                    context_parts.append("RED HAT CONTENT STANDARDS & STYLE GUIDES:")
+                                    context_parts.append("="*80)
+                                    context_parts.append(style_guides_context)
+                                    context_parts.append("="*80)
+                                
+                                # Load instruction files for more context
+                                instructions_context = self._load_redhat_instructions()
+                                if instructions_context:
+                                    context_parts.append("\n" + "="*80)
+                                    context_parts.append("RED HAT CONTENT INSTRUCTIONS:")
+                                    context_parts.append("="*80)
+                                    context_parts.append(instructions_context)
+                                    context_parts.append("="*80)
+                                
+                                context_parts.append("\n" + "="*80)
+                                context_parts.append("INSTRUCTIONS:")
+                                context_parts.append("="*80)
+                                context_parts.append("Review the file content above against the Red Hat style guides and standards.")
+                                context_parts.append("Identify ALL formatting issues, structural problems, and style violations.")
+                                context_parts.append("Provide the COMPLETE updated file content that follows ALL Red Hat formatting rules.")
+                                context_parts.append("Include proper AsciiDoc formatting, callouts where appropriate, correct heading structure,")
+                                context_parts.append("proper code block formatting, and adherence to all style guide requirements.")
+                                context_parts.append("Output the complete corrected file content ready to save.")
+                                context_parts.append("="*80 + "\n")
+                                
+                                mcp_tools_used.append(f"file_reader: {file_path}")
+                                print(f"DEBUG [SUCCESS]: File read successfully, {len(content_text)} characters loaded")
+                            else:
+                                error_msg = file_result.get("error", "Unknown error") if file_result else "No result returned"
+                                print(f"DEBUG [ERROR]: File reading failed: {error_msg}")
+                                context_parts.append(f"\n\nNOTE: Could not read file {file_path}. Error: {error_msg}")
+                                # Try direct file read as fallback
+                                try:
+                                    with open(file_path, 'r', encoding='utf-8') as f:
+                                        content_text = f.read()
+                                    style_guides_context = self._load_redhat_style_guides()
+                                    if style_guides_context:
+                                        context_parts.append("\n" + "="*80)
+                                        context_parts.append("FILE CONTENT (read directly):")
+                                        context_parts.append("="*80)
+                                        context_parts.append(content_text)
+                                        context_parts.append("\n" + "="*80)
+                                        context_parts.append("RED HAT STYLE GUIDES:")
+                                        context_parts.append("="*80)
+                                        context_parts.append(style_guides_context)
+                                        context_parts.append("="*80 + "\n")
+                                        print(f"DEBUG [FALLBACK]: Read file directly, {len(content_text)} characters")
+                                except Exception as fallback_error:
+                                    print(f"DEBUG [FALLBACK ERROR]: {fallback_error}")
+                                    context_parts.append(f"\n\nNOTE: Direct file read also failed: {fallback_error}")
+                        except Exception as e:
+                            print(f"DEBUG [EXCEPTION]: File reading exception: {e}")
+                            import traceback
+                            traceback.print_exc()
+                            # Try direct file read as fallback
+                            try:
+                                with open(file_path, 'r', encoding='utf-8') as f:
+                                    content_text = f.read()
+                                style_guides_context = self._load_redhat_style_guides()
+                                if style_guides_context:
+                                    context_parts.append("\n" + "="*80)
+                                    context_parts.append("FILE CONTENT (read directly after MCP failure):")
+                                    context_parts.append("="*80)
+                                    context_parts.append(content_text)
+                                    context_parts.append("\n" + "="*80)
+                                    context_parts.append("RED HAT STYLE GUIDES:")
+                                    context_parts.append("="*80)
+                                    context_parts.append(style_guides_context)
+                                    context_parts.append("="*80 + "\n")
+                            except Exception as fallback_error:
+                                context_parts.append(f"\n\nNOTE: Could not read file {file_path}. MCP error: {e}, Direct read error: {fallback_error}")
+                    else:
+                        print(f"DEBUG [NO PATH]: Could not extract file path from: {user_input}")
+                        context_parts.append(f"\n\nNOTE: File path not found or could not be extracted from request. Please provide the full path to the file.")
+                except Exception as e:
+                    print(f"DEBUG [REVIEW ERROR]: Review/update detection error: {e}")
+                    import traceback
+                    traceback.print_exc()
+            
+            if needs_redhat_content and self.mcp_executor and not is_review_update:
                 print(f"DEBUG [REDHAT CONTENT]: Red Hat content creation detected!")
                 try:
                     # Extract output directory if specified
@@ -1952,8 +2239,6 @@ class Mo11yAgent:
             content=f"User: {user_input}\nAssistant: {response}",
             context=json.dumps(context),
             importance=importance,
-            emotional_valence=0.0,
-            emotional_arousal=0.0,
             tags=context.get("topics", []),
             relationship_context=f"conversation|persona:{persona_name}"
         )
@@ -2142,6 +2427,154 @@ class Mo11yAgent:
                 confidence=0.7,
                 source_memory_id=memory_id
             )
+    
+    def _load_redhat_instructions(self) -> Optional[str]:
+        """
+        Load Red Hat instruction files (lectures.md, guided-exercises.md) from redhat-content-standards directory
+        Returns formatted text with instruction content, or None if not available
+        """
+        try:
+            # Try to get standards directory from config
+            config_path = "config.json"
+            standards_dir = None
+            
+            if os.path.exists(config_path):
+                with open(config_path, "r") as f:
+                    config = json.load(f)
+                    redhat_config = config.get("redhat_content", {})
+                    standards_dir = redhat_config.get("standards_dir")
+            
+            if not standards_dir or not os.path.exists(standards_dir):
+                return None
+            
+            instructions_dir = os.path.join(standards_dir, "instructions")
+            if not os.path.exists(instructions_dir):
+                return None
+            
+            # Load instruction files
+            instructions = []
+            instruction_files = [
+                ("lectures.md", "Lecture Development Instructions"),
+                ("guided-exercises.md", "Guided Exercise Development Instructions")
+            ]
+            
+            for filename, title in instruction_files:
+                file_path = os.path.join(instructions_dir, filename)
+                if os.path.exists(file_path):
+                    try:
+                        with open(file_path, "r", encoding="utf-8") as f:
+                            content = f.read()
+                            instructions.append(f"\n{title}:\n{'='*60}\n{content}\n")
+                    except Exception as e:
+                        print(f"Warning: Could not load instruction file {filename}: {e}")
+                        continue
+            
+            if instructions:
+                return "\n".join(instructions)
+            return None
+            
+        except Exception as e:
+            print(f"Warning: Could not load Red Hat instructions: {e}")
+            return None
+    
+    def _load_redhat_style_guides(self) -> Optional[str]:
+        """
+        Load Red Hat style guides from redhat-content-standards directory
+        Returns formatted text with style guide content, or None if not available
+        """
+        try:
+            # Try to get standards directory from config
+            config_path = "config.json"
+            standards_dir = None
+            
+            if os.path.exists(config_path):
+                with open(config_path, "r") as f:
+                    config = json.load(f)
+                    redhat_config = config.get("redhat_content", {})
+                    standards_dir = redhat_config.get("standards_dir")
+            
+            if not standards_dir or not os.path.exists(standards_dir):
+                return None
+            
+            style_guides_dir = os.path.join(standards_dir, "style-guides")
+            if not os.path.exists(style_guides_dir):
+                return None
+            
+            # Load all style guide files
+            style_guides = []
+            guide_files = [
+                ("asciidoc-formatting.md", "AsciiDoc Formatting Guide"),
+                ("content-structure.md", "Content Structure Guide"),
+                ("writing-style.md", "Writing Style Guide")
+            ]
+            
+            for filename, title in guide_files:
+                file_path = os.path.join(style_guides_dir, filename)
+                if os.path.exists(file_path):
+                    try:
+                        with open(file_path, "r", encoding="utf-8") as f:
+                            content = f.read()
+                            style_guides.append(f"\n{title}:\n{'='*60}\n{content}\n")
+                    except Exception as e:
+                        print(f"Warning: Could not load style guide {filename}: {e}")
+                        continue
+            
+            # Also load instruction files for callout details
+            instructions_dir = os.path.join(standards_dir, "instructions")
+            if os.path.exists(instructions_dir):
+                instruction_files = [
+                    ("lectures.md", "Lecture Instructions (includes callout details)"),
+                    ("guided-exercises.md", "Guided Exercise Instructions (includes callout details)")
+                ]
+                for filename, title in instruction_files:
+                    file_path = os.path.join(instructions_dir, filename)
+                    if os.path.exists(file_path):
+                        try:
+                            with open(file_path, "r", encoding="utf-8") as f:
+                                content = f.read()
+                                # Extract callout section if present
+                                if "callout" in content.lower() or "Callout" in content:
+                                    style_guides.append(f"\n{title}:\n{'='*60}\n{content}\n")
+                        except Exception as e:
+                            print(f"Warning: Could not load instruction file {filename}: {e}")
+                            continue
+            
+            if style_guides:
+                # Add AsciiDoc callout syntax reference based on Red Hat standards
+                callout_info = """
+                
+                RED HAT CALLOUT FORMAT (from style guides):
+                ==============================================
+                Callouts are used to explain content in example files and YAML manifests:
+                
+                Format:
+                1. Use callout numbers in angle brackets (<1>, <2>, <3>, etc.) INSIDE the code block
+                2. After the code block, add callout explanations starting with the callout number
+                3. Use [source] or [subs="+quotes,+macros"] blocks for code with callouts
+                
+                Example format:
+                [source,yaml]
+                ----
+                hosts: webservers <1>
+                  vars:
+                    http_port: 8080 <2>
+                ----
+                <1> Targets the webservers group
+                <2> Sets the HTTP port variable
+                
+                Important rules from Red Hat style guide:
+                - Include callout numbers and callout lists to explain example files and YAML manifests
+                - Do not include backslashes (\\) before callouts in the AsciiDoc output
+                - Do not include "#" or "##" before the [subs=] tags
+                - Display backticks with 2 plus signs: ++`++code++`++
+                ==============================================
+                """
+                return "\n".join(style_guides) + callout_info
+            return None
+            
+        except Exception as e:
+            print(f"Warning: Could not load Red Hat style guides: {e}")
+            return None
     
     def _load_rag_data(self, sona_path: Optional[str] = None) -> Optional[Dict]:
         """Load RAG data from file specified in persona config, including referenced files"""

@@ -27,8 +27,7 @@ class RelationshipTimeline:
         cutoff_date = datetime.now() - timedelta(days=days_back)
         cursor.execute("""
             SELECT DATE(timestamp) as date, COUNT(*) as count, 
-                   AVG(importance_score) as avg_importance,
-                   AVG(emotional_valence) as avg_sentiment
+                   AVG(importance_score) as avg_importance
             FROM episodic_memories
             WHERE timestamp >= ?
             GROUP BY DATE(timestamp)
@@ -44,7 +43,6 @@ class RelationshipTimeline:
         dates = [row[0] for row in rows]
         counts = [row[1] for row in rows]
         importance = [row[2] for row in rows]
-        sentiment = [row[3] for row in rows]
         
         fig = go.Figure()
         
@@ -85,51 +83,9 @@ class RelationshipTimeline:
         return fig
     
     def create_sentiment_heatmap(self, days_back: int = 90) -> go.Figure:
-        """Create a heatmap of sentiment over time"""
-        conn = sqlite3.connect(self.memory.db_path)
-        cursor = conn.cursor()
-        
-        cutoff_date = datetime.now() - timedelta(days=days_back)
-        cursor.execute("""
-            SELECT DATE(timestamp) as date, 
-                   emotional_valence,
-                   emotional_arousal
-            FROM episodic_memories
-            WHERE timestamp >= ? AND emotional_valence IS NOT NULL
-            ORDER BY date
-        """, (cutoff_date.isoformat(),))
-        
-        rows = cursor.fetchall()
-        conn.close()
-        
-        if not rows:
-            return self._empty_figure("No sentiment data yet")
-        
-        df = pd.DataFrame(rows, columns=['date', 'valence', 'arousal'])
-        df['date'] = pd.to_datetime(df['date'])
-        df['week'] = df['date'].dt.isocalendar().week
-        df['day_of_week'] = df['date'].dt.day_name()
-        
-        # Create pivot table for heatmap
-        pivot = df.pivot_table(
-            values='valence',
-            index='day_of_week',
-            columns='week',
-            aggfunc='mean'
-        )
-        
-        # Reorder days
-        day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-        pivot = pivot.reindex([d for d in day_order if d in pivot.index])
-        
-        fig = px.imshow(
-            pivot,
-            labels=dict(x="Week", y="Day of Week", color="Sentiment"),
-            color_continuous_scale="RdYlGn",
-            title="Sentiment Heatmap (Last 90 Days)"
-        )
-        
-        return fig
+        """Create a heatmap of sentiment over time (deprecated - emotional tracking removed)"""
+        # Emotional tracking has been removed - return empty figure
+        return self._empty_figure("Sentiment tracking is not available in business mode")
     
     def create_milestone_timeline(self) -> go.Figure:
         """Create a timeline of relationship milestones"""
