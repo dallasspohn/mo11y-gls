@@ -7,6 +7,7 @@ from typing import TypedDict, List, Dict, Optional
 import json
 import os
 import re
+import shutil
 from datetime import datetime
 
 try:
@@ -83,6 +84,7 @@ class AgentState(TypedDict):
     should_proact: bool
     proactivity_suggestions: List[str]
     interaction_metadata: Dict
+    edit_metadata: Optional[Dict]  # For file editing operations
 
 
 class Mo11yAgent:
@@ -1066,12 +1068,20 @@ class Mo11yAgent:
                     break
             
             # Check if this is a review/update request (has file path)
-            is_review_update = any(keyword in user_input_lower for keyword in ["review", "update", "fix"]) and any(keyword in user_input_lower for keyword in ["lecture", "ge", "lab", ".adoc"])
+            is_review_update = any(keyword in user_input_lower for keyword in ["review", "update", "fix", "edit", "add", "insert", "replace"]) and any(keyword in user_input_lower for keyword in ["lecture", "ge", "lab", ".adoc"])
             
-            print(f"DEBUG [DETECTION]: is_review_update={is_review_update}, mcp_executor={self.mcp_executor is not None}")
+            # Detect if this is a targeted edit (location-specific) vs full file regeneration
+            is_targeted_edit = any(keyword in user_input_lower for keyword in [
+                "at line", "line ", "after line", "before line", "around line",
+                "in section", "section ", "after section", "before section",
+                "at ", "after ", "before ", "replace ", "insert ", "add "
+            ]) and is_review_update
             
-            # Handle review/update requests
-            if is_review_update and self.mcp_executor:
+            print(f"DEBUG [DETECTION]: is_review_update={is_review_update}, is_targeted_edit={is_targeted_edit}, mcp_executor={self.mcp_executor is not None}")
+            print(f"DEBUG [DETECTION]: user_input_lower={user_input_lower[:200]}")
+            
+            # Handle review/update requests (works with or without MCP - can use direct file read)
+            if is_review_update:
                 print(f"DEBUG [REDHAT CONTENT]: Red Hat content review/update detected!")
                 try:
                     # Extract file path from user input
@@ -1107,70 +1117,284 @@ class Mo11yAgent:
                             file_path = os.path.normpath(file_path)
                             break
                     
-                    print(f"DEBUG [FILE PATH]: Extracted path: {file_path}, exists: {os.path.exists(file_path) if file_path else False}")
+                    print(f"DEBUG [FILE PATH]: Extracted path: {file_path}")
+                    print(f"DEBUG [FILE PATH]: Absolute path: {os.path.abspath(file_path) if file_path else 'None'}")
+                    print(f"DEBUG [FILE PATH]: File exists: {os.path.exists(file_path) if file_path else False}")
+                    if file_path and os.path.exists(file_path):
+                        print(f"DEBUG [FILE PATH]: File is readable: {os.access(file_path, os.R_OK)}")
+                        print(f"DEBUG [FILE PATH]: File is writable: {os.access(file_path, os.W_OK)}")
+                        print(f"DEBUG [FILE PATH]: File permissions: {oct(os.stat(file_path).st_mode)}")
+                        print(f"DEBUG [FILE PATH]: File owner UID: {os.stat(file_path).st_uid}")
+                        print(f"DEBUG [FILE PATH]: Current user UID: {os.getuid()}")
                     
                     if file_path:
-                        # Read the file using MCP file_reader tool if available
-                        try:
-                            print(f"DEBUG [MCP TOOL]: Calling file_reader with filename: {file_path}")
-                            file_result = self.mcp_executor.execute_tool(
-                                "file_reader",
-                                {"filename": file_path},  # Use "filename" not "file_path"
-                                context={"user_query": user_input}
-                            )
+                        # Read the file using MCP file_reader tool if available, otherwise use direct read
+                        content_text = None
+                        file_read_success = False
+                        
+                        if self.mcp_executor:
+                            try:
+                                print(f"DEBUG [MCP TOOL]: Calling file_reader with filename: {file_path}")
+                                file_result = self.mcp_executor.execute_tool(
+                                    "file_reader",
+                                    {"filename": file_path},  # Use "filename" not "file_path"
+                                    context={"user_query": user_input}
+                                )
                             
-                            print(f"DEBUG [MCP RESULT]: {file_result}")
+                                print(f"DEBUG [MCP RESULT]: {file_result}")
                             
-                            if file_result and file_result.get("success") and not file_result.get("isError"):
-                                # Extract content from result - handle multiple possible formats
-                                output = file_result.get("output", {})
-                                content_text = None
-                                
-                                # Format 1: Direct text string
-                                if isinstance(output, str):
-                                    content_text = output
-                                # Format 2: Dict with content field
-                                elif isinstance(output, dict):
-                                    # Check for MCP format: {"content": [{"type": "text", "text": ...}]}
-                                    if "content" in output:
-                                        content_list = output["content"]
-                                        if isinstance(content_list, list) and len(content_list) > 0:
-                                            content_item = content_list[0]
-                                            if isinstance(content_item, dict):
-                                                # Extract text field
-                                                content_text = content_item.get("text", str(content_item))
+                                if file_result and file_result.get("success") and not file_result.get("isError"):
+                                    # MCP read successful - process the result
+                                    # Extract content from result - handle multiple possible formats
+                                    output = file_result.get("output", {})
+                                    content_text = None
+                                    
+                                    # Format 1: Direct text string
+                                    if isinstance(output, str):
+                                        content_text = output
+                                    # Format 2: Dict with content field
+                                    elif isinstance(output, dict):
+                                        # Check for MCP format: {"content": [{"type": "text", "text": ...}]}
+                                        if "content" in output:
+                                            content_list = output["content"]
+                                            if isinstance(content_list, list) and len(content_list) > 0:
+                                                content_item = content_list[0]
+                                                if isinstance(content_item, dict):
+                                                    # Extract text field
+                                                    content_text = content_item.get("text", str(content_item))
+                                                else:
+                                                    content_text = str(content_item)
                                             else:
-                                                content_text = str(content_item)
+                                                content_text = str(content_list)
+                                        # Check for direct text field
+                                        elif "text" in output:
+                                            content_text = output["text"]
+                                        # Check if output itself is the content (nested structure)
+                                        elif isinstance(output, dict) and len(output) == 1 and "text" in list(output.values())[0]:
+                                            content_text = list(output.values())[0]["text"]
                                         else:
-                                            content_text = str(content_list)
-                                    # Check for direct text field
-                                    elif "text" in output:
-                                        content_text = output["text"]
-                                    # Check if output itself is the content (nested structure)
-                                    elif isinstance(output, dict) and len(output) == 1 and "text" in list(output.values())[0]:
-                                        content_text = list(output.values())[0]["text"]
-                                    else:
-                                        # Try to find any text-like field
-                                        for key in ["text", "content", "data", "file_content"]:
-                                            if key in output:
-                                                val = output[key]
-                                                if isinstance(val, str):
-                                                    content_text = val
-                                                    break
-                                                elif isinstance(val, list) and len(val) > 0:
-                                                    if isinstance(val[0], dict) and "text" in val[0]:
-                                                        content_text = val[0]["text"]
+                                            # Try to find any text-like field
+                                            for key in ["text", "content", "data", "file_content"]:
+                                                if key in output:
+                                                    val = output[key]
+                                                    if isinstance(val, str):
+                                                        content_text = val
                                                         break
-                                    # Last resort: convert to string
-                                    if not content_text:
+                                                    elif isinstance(val, list) and len(val) > 0:
+                                                        if isinstance(val[0], dict) and "text" in val[0]:
+                                                            content_text = val[0]["text"]
+                                                            break
+                                        # Last resort: convert to string
+                                        if not content_text:
+                                            content_text = str(output)
+                                    else:
                                         content_text = str(output)
+                                    
+                                    if not content_text:
+                                        raise ValueError("Could not extract content from file_reader result")
+                                    
+                                    # Load style guides
+                                    style_guides_context = self._load_redhat_style_guides()
+                                    
+                                    # Add file content and style guides to context for review
+                                    context_parts.append("\n" + "="*80)
+                                    context_parts.append("FILE TO REVIEW AND UPDATE:")
+                                    context_parts.append("="*80)
+                                    context_parts.append(f"File Path: {file_path}\n")
+                                    context_parts.append("File Content:")
+                                    context_parts.append("-" * 80)
+                                    context_parts.append(content_text)
+                                    context_parts.append("-" * 80)
+                                    
+                                    if style_guides_context:
+                                        context_parts.append("\n" + "="*80)
+                                        context_parts.append("RED HAT CONTENT STANDARDS & STYLE GUIDES:")
+                                        context_parts.append("="*80)
+                                        context_parts.append(style_guides_context)
+                                        context_parts.append("="*80)
+                                    
+                                    # Load instruction files for more context
+                                    instructions_context = self._load_redhat_instructions()
+                                    if instructions_context:
+                                        context_parts.append("\n" + "="*80)
+                                        context_parts.append("RED HAT CONTENT INSTRUCTIONS:")
+                                        context_parts.append("="*80)
+                                        context_parts.append(instructions_context)
+                                        context_parts.append("="*80)
+                                    
+                                    # Parse location information if this is a targeted edit
+                                    edit_location = None
+                                    edit_type = "replace"  # replace, insert_after, insert_before
+                                    
+                                    if is_targeted_edit:
+                                        edit_location = self._parse_edit_location(user_input, content_text)
+                                        if edit_location:
+                                            edit_type = edit_location.get("type", "replace")
+                                            print(f"DEBUG [TARGETED EDIT]: Location={edit_location}, Type={edit_type}")
+                                    
+                                    # Build instructions based on edit type
+                                    context_parts.append("\n" + "="*80)
+                                    context_parts.append("INSTRUCTIONS:")
+                                    context_parts.append("="*80)
+                                    
+                                    if is_targeted_edit and edit_location:
+                                        # Targeted edit instructions
+                                        location_desc = edit_location.get("description", "")
+                                        
+                                        # Check if user specified what content to insert
+                                        user_specified_content = False
+                                        content_keywords = ["codeblock", "code block", "section", "heading", "paragraph", "content", "add", "insert"]
+                                        if any(keyword in user_input_lower for keyword in content_keywords):
+                                            user_specified_content = True
+                                        
+                                        context_parts.append(f"TARGETED EDIT REQUEST:")
+                                        context_parts.append(f"Location: {location_desc}")
+                                        context_parts.append(f"Edit Type: {edit_type}")
+                                        context_parts.append("")
+                                        
+                                        # Always provide context about what to generate
+                                        context_parts.append("TASK: Generate new AsciiDoc content for insertion into the lecture file.")
+                                        context_parts.append("")
+                                        
+                                        # Show context around the insertion point
+                                        if edit_location and edit_location.get("line_number"):
+                                            line_num = edit_location.get("line_number")
+                                            file_lines = content_text.split('\n')
+                                            # Show 5 lines before and after for context
+                                            start_idx = max(0, line_num - 6)
+                                            end_idx = min(len(file_lines), line_num + 5)
+                                            context_lines = file_lines[start_idx:end_idx]
+                                            context_parts.append(f"CONTEXT AROUND INSERTION POINT (lines {start_idx+1}-{end_idx}):")
+                                            context_parts.append("-" * 80)
+                                            for i, line in enumerate(context_lines):
+                                                actual_line_num = start_idx + i + 1
+                                                marker = ">>>" if actual_line_num == line_num else "   "
+                                                context_parts.append(f"{marker} {actual_line_num:4d}: {line}")
+                                            context_parts.append("-" * 80)
+                                            context_parts.append("")
+                                        
+                                        if user_specified_content:
+                                            # User specified what to insert - extract and use it
+                                            context_parts.append("The user has specified what content to insert. Generate the appropriate AsciiDoc content")
+                                            context_parts.append("based on their request and the context shown above.")
+                                        else:
+                                            # User didn't specify - infer from context
+                                            context_parts.append("The user wants to insert content but didn't specify exactly what.")
+                                            context_parts.append("Based on the file context shown above, generate appropriate AsciiDoc content")
+                                            context_parts.append("that would logically fit at this location in the lecture.")
+                                            context_parts.append("")
+                                            context_parts.append("Consider:")
+                                            context_parts.append("- What topic/section would naturally come next at this location?")
+                                            context_parts.append("- What content would help explain or expand on the surrounding sections?")
+                                            context_parts.append("- What would maintain the logical flow of the lecture?")
+                                        
+                                        context_parts.append("")
+                                        if edit_type == "insert_after":
+                                            context_parts.append(f"Generate new AsciiDoc content to insert AFTER {location_desc}.")
+                                            context_parts.append("The content should logically continue from what comes before.")
+                                        elif edit_type == "insert_before":
+                                            context_parts.append(f"Generate new AsciiDoc content to insert BEFORE {location_desc}.")
+                                            context_parts.append("The content should logically lead into what comes after.")
+                                        elif edit_type == "replace":
+                                            context_parts.append(f"Generate replacement AsciiDoc content for {location_desc}.")
+                                            context_parts.append("The content should maintain the same level and context.")
+                                        
+                                        context_parts.append("")
+                                        context_parts.append("CRITICAL: You MUST generate AsciiDoc content. Do NOT refuse this request.")
+                                        context_parts.append("Even if the user didn't specify exactly what to insert, you should:")
+                                        context_parts.append("1. Analyze the file context shown above")
+                                        context_parts.append("2. Determine what content would logically fit at this location")
+                                        context_parts.append("3. Generate appropriate AsciiDoc content that fits the lecture structure")
+                                        context_parts.append("")
+                                        context_parts.append("CRITICAL FORMATTING REQUIREMENTS:")
+                                        context_parts.append("- Provide ONLY the new AsciiDoc content")
+                                        context_parts.append("- Do NOT include any explanations, thinking process, or commentary")
+                                        context_parts.append("- Do NOT include phrases like 'Here's the content:' or 'The content is:'")
+                                        context_parts.append("- Do NOT say 'I can't assist' or refuse - you MUST generate content")
+                                        context_parts.append("- Start directly with the AsciiDoc content (heading, paragraph, code block, etc.)")
+                                        context_parts.append("- End directly after the content (no closing remarks)")
+                                        context_parts.append("- Follow Red Hat AsciiDoc formatting standards")
+                                        context_parts.append("- Use proper heading levels (==, ===, ====)")
+                                        context_parts.append("- Use proper code blocks with [source] or [subs=\"+quotes,+macros\"]")
+                                        context_parts.append("")
+                                        context_parts.append("EXAMPLE FORMAT (output exactly like this, no explanations):")
+                                        context_parts.append("```asciidoc")
+                                        context_parts.append("== New Section Title")
+                                        context_parts.append("")
+                                        context_parts.append("Content paragraph here...")
+                                        context_parts.append("```")
+                                        context_parts.append("")
+                                        context_parts.append("REMEMBER: Generate the content now. The content will be automatically inserted at the specified location.")
+                                    else:
+                                        # Full file regeneration instructions
+                                        context_parts.append("Review the file content above against the Red Hat style guides and standards.")
+                                        context_parts.append("Identify ALL formatting issues, structural problems, and style violations.")
+                                        context_parts.append("Provide the COMPLETE updated file content that follows ALL Red Hat formatting rules.")
+                                        context_parts.append("Include proper AsciiDoc formatting, callouts where appropriate, correct heading structure,")
+                                        context_parts.append("proper code block formatting, and adherence to all style guide requirements.")
+                                        context_parts.append("Output the complete corrected file content ready to save.")
+                                    
+                                    context_parts.append("="*80 + "\n")
+                                    
+                                    # Store edit metadata for post-processing
+                                    if is_targeted_edit and edit_location:
+                                        if "edit_metadata" not in state:
+                                            state["edit_metadata"] = {}
+                                        state["edit_metadata"]["file_path"] = file_path
+                                        state["edit_metadata"]["edit_location"] = edit_location
+                                        state["edit_metadata"]["edit_type"] = edit_type
+                                        state["edit_metadata"]["original_content"] = content_text
+                                    elif not is_targeted_edit:
+                                        # Store for full file replacement
+                                        if "edit_metadata" not in state:
+                                            state["edit_metadata"] = {}
+                                        state["edit_metadata"]["file_path"] = file_path
+                                        state["edit_metadata"]["edit_type"] = "replace"
+                                        state["edit_metadata"]["original_content"] = content_text
+                                    
+                                    mcp_tools_used.append(f"file_reader: {file_path}")
+                                    print(f"DEBUG [SUCCESS]: File read successfully via MCP, {len(content_text)} characters loaded")
+                                    file_read_success = True
                                 else:
-                                    content_text = str(output)
+                                    # MCP read failed
+                                    error_msg = file_result.get("error", "Unknown error") if file_result else "No result returned"
+                                    print(f"DEBUG [ERROR]: MCP file reading failed: {error_msg}")
+                                    # Will fall through to direct file read
+                            except Exception as mcp_error:
+                                # MCP exception occurred
+                                print(f"DEBUG [MCP ERROR]: MCP file_reader exception: {mcp_error}")
+                                import traceback
+                                traceback.print_exc()
+                                # Will fall through to direct file read
+                        
+                        # If MCP didn't work or isn't available, try direct file read
+                        if not file_read_success:
+                            print(f"DEBUG [DIRECT READ]: Attempting direct file read for {file_path}")
+                            try:
+                                with open(file_path, 'r', encoding='utf-8') as f:
+                                    content_text = f.read()
                                 
-                                if not content_text:
-                                    raise ValueError("Could not extract content from file_reader result")
+                                print(f"DEBUG [DIRECT READ]: Successfully read {len(content_text)} characters")
                                 
-                                # Load style guides
+                                # Parse location if targeted edit
+                                edit_location = None
+                                edit_type = "replace"
+                                if is_targeted_edit:
+                                    edit_location = self._parse_edit_location(user_input, content_text)
+                                    if edit_location:
+                                        edit_type = edit_location.get("type", "replace")
+                                        print(f"DEBUG [TARGETED EDIT]: Location={edit_location}, Type={edit_type}")
+                                
+                                # Store edit metadata
+                                if "edit_metadata" not in state:
+                                    state["edit_metadata"] = {}
+                                state["edit_metadata"]["file_path"] = file_path
+                                if edit_location:
+                                    state["edit_metadata"]["edit_location"] = edit_location
+                                state["edit_metadata"]["edit_type"] = edit_type
+                                state["edit_metadata"]["original_content"] = content_text
+                                
+                                # Load style guides and add to context (same structure as MCP path)
                                 style_guides_context = self._load_redhat_style_guides()
                                 
                                 # Add file content and style guides to context for review
@@ -1199,63 +1423,61 @@ class Mo11yAgent:
                                     context_parts.append(instructions_context)
                                     context_parts.append("="*80)
                                 
+                                # Build instructions based on edit type (same as MCP path)
                                 context_parts.append("\n" + "="*80)
                                 context_parts.append("INSTRUCTIONS:")
                                 context_parts.append("="*80)
-                                context_parts.append("Review the file content above against the Red Hat style guides and standards.")
-                                context_parts.append("Identify ALL formatting issues, structural problems, and style violations.")
-                                context_parts.append("Provide the COMPLETE updated file content that follows ALL Red Hat formatting rules.")
-                                context_parts.append("Include proper AsciiDoc formatting, callouts where appropriate, correct heading structure,")
-                                context_parts.append("proper code block formatting, and adherence to all style guide requirements.")
-                                context_parts.append("Output the complete corrected file content ready to save.")
+                                
+                                if is_targeted_edit and edit_location:
+                                    # Targeted edit instructions
+                                    location_desc = edit_location.get("description", "")
+                                    context_parts.append(f"TARGETED EDIT REQUEST: {location_desc}")
+                                    context_parts.append("")
+                                    context_parts.append("CRITICAL INSTRUCTIONS:")
+                                    context_parts.append("- Provide ONLY the new content to insert/replace")
+                                    context_parts.append("- Do NOT include any explanations, thinking process, or commentary")
+                                    context_parts.append("- Do NOT include phrases like 'Here's the content:' or 'The content is:'")
+                                    context_parts.append("- Do NOT include the entire file - only the new content")
+                                    context_parts.append("- Start directly with the AsciiDoc content")
+                                    context_parts.append("- End directly after the content (no closing remarks)")
+                                    context_parts.append("")
+                                    if edit_type == "insert_after":
+                                        context_parts.append(f"Insert the new content AFTER {location_desc}.")
+                                        context_parts.append("Keep all existing content before and after the insertion point.")
+                                    elif edit_type == "insert_before":
+                                        context_parts.append(f"Insert the new content BEFORE {location_desc}.")
+                                        context_parts.append("Keep all existing content before and after the insertion point.")
+                                    elif edit_type == "replace":
+                                        context_parts.append(f"Replace the content at {location_desc} with the new content.")
+                                        context_parts.append("Keep all other content unchanged.")
+                                    context_parts.append("")
+                                    context_parts.append("EXAMPLE OF CORRECT FORMAT:")
+                                    context_parts.append("```asciidoc")
+                                    context_parts.append("== New Section Title")
+                                    context_parts.append("")
+                                    context_parts.append("Content here...")
+                                    context_parts.append("```")
+                                    context_parts.append("")
+                                    context_parts.append("DO NOT include text before or after the code block.")
+                                    context_parts.append("The content will be automatically inserted/replaced at the specified location.")
+                                else:
+                                    # Full file regeneration instructions
+                                    context_parts.append("Review the file content above against the Red Hat style guides and standards.")
+                                    context_parts.append("Identify ALL formatting issues, structural problems, and style violations.")
+                                    context_parts.append("Provide the COMPLETE updated file content that follows ALL Red Hat formatting rules.")
+                                    context_parts.append("Include proper AsciiDoc formatting, callouts where appropriate, correct heading structure,")
+                                    context_parts.append("proper code block formatting, and adherence to all style guide requirements.")
+                                    context_parts.append("Output the complete corrected file content ready to save.")
+                                
                                 context_parts.append("="*80 + "\n")
                                 
-                                mcp_tools_used.append(f"file_reader: {file_path}")
-                                print(f"DEBUG [SUCCESS]: File read successfully, {len(content_text)} characters loaded")
-                            else:
-                                error_msg = file_result.get("error", "Unknown error") if file_result else "No result returned"
-                                print(f"DEBUG [ERROR]: File reading failed: {error_msg}")
-                                context_parts.append(f"\n\nNOTE: Could not read file {file_path}. Error: {error_msg}")
-                                # Try direct file read as fallback
-                                try:
-                                    with open(file_path, 'r', encoding='utf-8') as f:
-                                        content_text = f.read()
-                                    style_guides_context = self._load_redhat_style_guides()
-                                    if style_guides_context:
-                                        context_parts.append("\n" + "="*80)
-                                        context_parts.append("FILE CONTENT (read directly):")
-                                        context_parts.append("="*80)
-                                        context_parts.append(content_text)
-                                        context_parts.append("\n" + "="*80)
-                                        context_parts.append("RED HAT STYLE GUIDES:")
-                                        context_parts.append("="*80)
-                                        context_parts.append(style_guides_context)
-                                        context_parts.append("="*80 + "\n")
-                                        print(f"DEBUG [FALLBACK]: Read file directly, {len(content_text)} characters")
-                                except Exception as fallback_error:
-                                    print(f"DEBUG [FALLBACK ERROR]: {fallback_error}")
-                                    context_parts.append(f"\n\nNOTE: Direct file read also failed: {fallback_error}")
-                        except Exception as e:
-                            print(f"DEBUG [EXCEPTION]: File reading exception: {e}")
-                            import traceback
-                            traceback.print_exc()
-                            # Try direct file read as fallback
-                            try:
-                                with open(file_path, 'r', encoding='utf-8') as f:
-                                    content_text = f.read()
-                                style_guides_context = self._load_redhat_style_guides()
-                                if style_guides_context:
-                                    context_parts.append("\n" + "="*80)
-                                    context_parts.append("FILE CONTENT (read directly after MCP failure):")
-                                    context_parts.append("="*80)
-                                    context_parts.append(content_text)
-                                    context_parts.append("\n" + "="*80)
-                                    context_parts.append("RED HAT STYLE GUIDES:")
-                                    context_parts.append("="*80)
-                                    context_parts.append(style_guides_context)
-                                    context_parts.append("="*80 + "\n")
-                            except Exception as fallback_error:
-                                context_parts.append(f"\n\nNOTE: Could not read file {file_path}. MCP error: {e}, Direct read error: {fallback_error}")
+                                print(f"DEBUG [DIRECT READ]: File read and context set up successfully")
+                                
+                            except Exception as direct_read_error:
+                                print(f"DEBUG [DIRECT READ ERROR]: {direct_read_error}")
+                                import traceback
+                                traceback.print_exc()
+                                context_parts.append(f"\n\nNOTE: Could not read file {file_path}. Error: {direct_read_error}")
                     else:
                         print(f"DEBUG [NO PATH]: Could not extract file path from: {user_input}")
                         context_parts.append(f"\n\nNOTE: File path not found or could not be extracted from request. Please provide the full path to the file.")
@@ -2184,7 +2406,235 @@ class Mo11yAgent:
                     f"Try: ollama pull {self.model_name} or check model status."
                 )
             else:
-                state["response"] = response
+                # Check if this is a file edit request and process it
+                edit_metadata = state.get("edit_metadata")
+                print(f"DEBUG [FILE EDIT CHECK]: edit_metadata exists: {edit_metadata is not None}")
+                print(f"DEBUG [FILE EDIT CHECK]: edit_metadata type: {type(edit_metadata)}")
+                if edit_metadata:
+                    print(f"DEBUG [FILE EDIT CHECK]: edit_metadata keys: {list(edit_metadata.keys()) if isinstance(edit_metadata, dict) else 'not a dict'}")
+                    print(f"DEBUG [FILE EDIT CHECK]: file_path in metadata: {edit_metadata.get('file_path') if isinstance(edit_metadata, dict) else 'N/A'}")
+                
+                if edit_metadata and isinstance(edit_metadata, dict) and edit_metadata.get("file_path"):
+                    file_path = edit_metadata.get("file_path")
+                    edit_location = edit_metadata.get("edit_location")
+                    edit_type = edit_metadata.get("edit_type", "replace")
+                    original_content = edit_metadata.get("original_content", "")
+                    
+                    print(f"DEBUG [FILE EDIT]: Processing file edit for {file_path}")
+                    print(f"DEBUG [FILE EDIT]: edit_type={edit_type}, edit_location={edit_location}")
+                    print(f"DEBUG [FILE EDIT]: original_content length={len(original_content) if original_content else 0}")
+                    print(f"DEBUG [FILE EDIT]: response length={len(response) if response else 0}")
+                    
+                    # Filter thinking tokens first if needed (before extraction)
+                    response_to_extract = response
+                    if self.suppress_thinking and response:
+                        # Apply thinking filter again to be sure
+                        filtered_response = self._filter_thinking_tokens(response)
+                        if filtered_response and filtered_response.strip():
+                            response_to_extract = filtered_response
+                            print(f"DEBUG [FILE EDIT]: Applied thinking filter, length: {len(response)} -> {len(response_to_extract)}")
+                    
+                    # Also clean explanatory text before extraction
+                    response_to_extract = self._clean_explanatory_text(response_to_extract)
+                    print(f"DEBUG [FILE EDIT]: Cleaned explanatory text, length: {len(response)} -> {len(response_to_extract)}")
+                    
+                    # Check if model refused the request (only check for explicit refusals)
+                    refusal_patterns = [
+                        "i'm sorry, but i can't assist",
+                        "i can't assist with that",
+                        "i cannot assist",
+                        "i'm unable to help",
+                        "cannot help",
+                        "unable to help",
+                        "i'm sorry, but i cannot",
+                    ]
+                    response_lower = response_to_extract.lower() if response_to_extract else ""
+                    # Only match if the response starts with or contains a clear refusal phrase
+                    # Make it less aggressive - only match if response is short AND contains refusal pattern
+                    is_refusal = (
+                        len(response_to_extract) < 150 and  # Short response
+                        any(pattern in response_lower for pattern in refusal_patterns)  # Contains refusal pattern
+                    )
+                    
+                    print(f"DEBUG [FILE EDIT]: Checking for refusal - response length: {len(response_to_extract) if response_to_extract else 0}, is_refusal: {is_refusal}")
+                    if is_refusal:
+                        print(f"DEBUG [FILE EDIT]: Response matches refusal pattern: {response_to_extract[:100]}")
+                    
+                    if is_refusal:
+                        print(f"DEBUG [FILE EDIT]: Model refused the request")
+                        # Provide helpful response asking user to specify what to insert
+                        state["response"] = (
+                            f"I understand you want to insert content, but I need more information.\n\n"
+                            f"Please specify what content you'd like me to insert. For example:\n"
+                            f"- 'Insert a codeblock showing X after line 25'\n"
+                            f"- 'Insert a section about Y after line 25'\n"
+                            f"- 'Insert the following content after line 25: [your content]'\n\n"
+                            f"Or if you want me to infer appropriate content based on the file context, "
+                            f"please rephrase as: 'Generate and insert appropriate content after line 25'"
+                        )
+                    else:
+                        # Extract file content from response
+                        print(f"DEBUG [FILE EDIT]: Attempting to extract file content from response (length: {len(response_to_extract) if response_to_extract else 0})")
+                        print(f"DEBUG [FILE EDIT]: Response preview (first 300 chars): {response_to_extract[:300] if response_to_extract else 'None'}")
+                        file_content = self._extract_file_content_from_response(response_to_extract)
+                        print(f"DEBUG [FILE EDIT]: Extracted file_content length={len(file_content) if file_content else 0}")
+                        if file_content:
+                            print(f"DEBUG [FILE EDIT]: Successfully extracted file content, proceeding with edit")
+                        else:
+                            print(f"DEBUG [FILE EDIT]: Failed to extract file content, will try fallback methods")
+                        
+                        if file_content:
+                            try:
+                                if edit_location and edit_type in ["insert_after", "insert_before"]:
+                                    # Targeted insert edit
+                                    print(f"DEBUG [FILE EDIT]: Applying targeted insert edit (type={edit_type})")
+                                    updated_content = self._apply_targeted_edit(
+                                        file_path, original_content, file_content, edit_location
+                                    )
+                                    print(f"DEBUG [FILE EDIT]: Updated content length={len(updated_content)}")
+                                elif edit_location and edit_type == "replace":
+                                    # Targeted replace edit
+                                    print(f"DEBUG [FILE EDIT]: Applying targeted replace edit")
+                                    updated_content = self._apply_targeted_edit(
+                                        file_path, original_content, file_content, edit_location
+                                    )
+                                    print(f"DEBUG [FILE EDIT]: Updated content length={len(updated_content)}")
+                                else:
+                                    # Full file replacement (no edit_location or edit_type is "replace" without location)
+                                    print(f"DEBUG [FILE EDIT]: Applying full file replacement")
+                                    updated_content = file_content
+                                
+                                # Write file with backup
+                                print(f"DEBUG [FILE EDIT]: Writing file to {file_path}")
+                                if self._write_file_with_backup(file_path, updated_content):
+                                    state["response"] = (
+                                        f"✅ Successfully updated file: {file_path}\n\n"
+                                        f"{response}\n\n"
+                                        f"File has been saved. A backup was created before making changes."
+                                    )
+                                    print(f"DEBUG [FILE EDIT]: File written successfully!")
+                                else:
+                                    state["response"] = (
+                                        f"⚠️ Generated updated content but failed to write to file: {file_path}\n\n"
+                                        f"{response}\n\n"
+                                        f"Please manually save the content above to the file."
+                                    )
+                                    print(f"DEBUG [FILE EDIT]: File write failed!")
+                            except Exception as e:
+                                import traceback
+                                error_trace = traceback.format_exc()
+                                print(f"DEBUG [FILE EDIT ERROR]: Exception during file edit: {e}")
+                                print(f"DEBUG [FILE EDIT ERROR]: Traceback: {error_trace}")
+                                state["response"] = (
+                                    f"⚠️ Error processing file edit: {str(e)}\n\n"
+                                    f"{response}\n\n"
+                                    f"Please check the debug logs for details."
+                                )
+                        else:
+                            # Couldn't extract file content, but response might still be useful
+                            print(f"DEBUG [FILE EDIT]: Could not extract file content from response")
+                            print(f"DEBUG [FILE EDIT]: Response preview (first 500 chars):\n{response[:500] if response else 'None'}")
+                            print(f"DEBUG [FILE EDIT]: Response preview (last 500 chars):\n{response[-500:] if response and len(response) > 500 else 'None'}")
+                            
+                            # Try more aggressive extraction - look for content after explanatory text
+                            # Sometimes LLM adds explanation before/after the actual content
+                            response_cleaned = response.strip()
+                            
+                            # Remove common prefixes
+                            prefixes_to_remove = [
+                                "here's the content:",
+                                "here is the content:",
+                                "here's the updated content:",
+                                "here is the updated content:",
+                                "the content is:",
+                                "the updated content:",
+                                "content:",
+                                "updated content:",
+                            ]
+                            for prefix in prefixes_to_remove:
+                                if response_cleaned.lower().startswith(prefix):
+                                    response_cleaned = response_cleaned[len(prefix):].strip()
+                                    print(f"DEBUG [FILE EDIT]: Removed prefix '{prefix}'")
+                            
+                            # Remove common suffixes
+                            suffixes_to_remove = [
+                                "let me know if you need any changes",
+                                "let me know if you need changes",
+                                "hope this helps",
+                                "if you need any changes",
+                            ]
+                            for suffix in suffixes_to_remove:
+                                if response_cleaned.lower().endswith(suffix):
+                                    response_cleaned = response_cleaned[:-len(suffix)].strip()
+                                    print(f"DEBUG [FILE EDIT]: Removed suffix '{suffix}'")
+                            
+                            # Try using cleaned response if it looks like AsciiDoc or is substantial
+                            use_response = False
+                            if response_cleaned:
+                                # Check for AsciiDoc markers
+                                if "==" in response_cleaned or "[source" in response_cleaned or "[subs=" in response_cleaned:
+                                    use_response = True
+                                    print(f"DEBUG [FILE EDIT]: Cleaned response contains AsciiDoc markers")
+                                # Check if it's substantial content (more than just explanation)
+                                elif len(response_cleaned) > 200:
+                                    # Check if it has structure (multiple lines, not just one paragraph)
+                                    lines = response_cleaned.split('\n')
+                                    if len(lines) > 3:
+                                        use_response = True
+                                        print(f"DEBUG [FILE EDIT]: Cleaned response is substantial ({len(response_cleaned)} chars, {len(lines)} lines)")
+                            
+                            if use_response:
+                                print(f"DEBUG [FILE EDIT]: Using cleaned response as file content")
+                                try:
+                                    if edit_location and edit_type in ["insert_after", "insert_before"]:
+                                        updated_content = self._apply_targeted_edit(
+                                            file_path, original_content, response_cleaned, edit_location
+                                        )
+                                    elif edit_location and edit_type == "replace":
+                                        updated_content = self._apply_targeted_edit(
+                                            file_path, original_content, response_cleaned, edit_location
+                                        )
+                                    else:
+                                        updated_content = response_cleaned
+                                    
+                                    if self._write_file_with_backup(file_path, updated_content):
+                                        state["response"] = (
+                                            f"✅ Successfully updated file: {file_path}\n\n"
+                                            f"{response}\n\n"
+                                            f"File has been saved. A backup was created before making changes."
+                                        )
+                                        print(f"DEBUG [FILE EDIT]: File written successfully using cleaned response!")
+                                    else:
+                                        state["response"] = (
+                                            f"⚠️ Generated content but failed to write to file: {file_path}\n\n"
+                                            f"{response}\n\n"
+                                            f"Please manually save the content above."
+                                        )
+                                except Exception as e:
+                                    import traceback
+                                    error_trace = traceback.format_exc()
+                                    print(f"DEBUG [FILE EDIT ERROR]: Exception using cleaned response: {e}")
+                                    print(f"DEBUG [FILE EDIT ERROR]: Traceback: {error_trace}")
+                                    state["response"] = (
+                                        f"⚠️ Error processing file edit: {str(e)}\n\n"
+                                        f"{response}\n\n"
+                                        f"Please check the debug logs for details."
+                                    )
+                            else:
+                                # Couldn't extract content - last resort: show the response and ask user to check
+                                print(f"DEBUG [FILE EDIT]: Could not extract file content, showing response to user")
+                                state["response"] = (
+                                    f"⚠️ Could not extract file content from response.\n\n"
+                                    f"The response was:\n\n{response}\n\n"
+                                    f"If you want to insert specific content, please specify what to insert. "
+                                    f"For example: 'Insert a codeblock showing [content] after line 25'\n\n"
+                                    f"Alternatively, if the response above contains the content you want, "
+                                    f"you can copy it and manually insert it into the file."
+                                )
+                                print(f"DEBUG [FILE EDIT]: Could not use response as file content")
+                else:
+                    print(f"DEBUG [FILE EDIT CHECK]: No edit_metadata or no file_path, skipping file edit")
+                    state["response"] = response
             
             # Store data source tracking in state for logging
             if "data_sources" not in state:
@@ -2575,6 +3025,541 @@ class Mo11yAgent:
         except Exception as e:
             print(f"Warning: Could not load Red Hat style guides: {e}")
             return None
+    
+    def _parse_edit_location(self, user_input: str, file_content: str) -> Optional[Dict]:
+        """
+        Parse edit location from user input
+        
+        Returns:
+            Dict with:
+                - type: "insert_after", "insert_before", "replace"
+                - line_number: int (if line-based)
+                - section_name: str (if section-based)
+                - description: str (human-readable description)
+                - match_text: str (text to find/match)
+        """
+        user_lower = user_input.lower()
+        lines = file_content.split('\n')
+        
+        # Try to extract line number
+        line_number = None
+        line_patterns = [
+            r"line\s+(\d+)",
+            r"at\s+line\s+(\d+)",
+            r"after\s+line\s+(\d+)",
+            r"before\s+line\s+(\d+)",
+            r"around\s+line\s+(\d+)",
+        ]
+        for pattern in line_patterns:
+            match = re.search(pattern, user_lower)
+            if match:
+                line_number = int(match.group(1))
+                # Validate line number
+                if 1 <= line_number <= len(lines):
+                    # Determine edit type
+                    if "after" in user_lower:
+                        edit_type = "insert_after"
+                    elif "before" in user_lower:
+                        edit_type = "insert_before"
+                    else:
+                        edit_type = "replace"
+                    
+                    return {
+                        "type": edit_type,
+                        "line_number": line_number,
+                        "description": f"line {line_number}",
+                        "match_text": lines[line_number - 1] if line_number <= len(lines) else ""
+                    }
+        
+        # Try to extract section name (AsciiDoc headings)
+        section_patterns = [
+            r"(?:in|at|after|before)\s+section\s+['\"]?([^'\"]+)['\"]?",
+            r"section\s+['\"]?([^'\"]+)['\"]?",
+            r"heading\s+['\"]?([^'\"]+)['\"]?",
+        ]
+        for pattern in section_patterns:
+            match = re.search(pattern, user_lower)
+            if match:
+                section_name = match.group(1).strip()
+                # Find section in file
+                section_line = None
+                for i, line in enumerate(lines):
+                    # AsciiDoc headings: ==, ===, ====
+                    if re.match(r'^=+\s+', line):
+                        heading_text = re.sub(r'^=+\s+', '', line).strip()
+                        if section_name.lower() in heading_text.lower() or heading_text.lower() in section_name.lower():
+                            section_line = i + 1  # 1-indexed
+                            break
+                
+                if section_line:
+                    # Determine edit type
+                    if "after" in user_lower:
+                        edit_type = "insert_after"
+                    elif "before" in user_lower:
+                        edit_type = "insert_before"
+                    else:
+                        edit_type = "replace"
+                    
+                    return {
+                        "type": edit_type,
+                        "line_number": section_line,
+                        "section_name": section_name,
+                        "description": f"section '{section_name}' (line {section_line})",
+                        "match_text": lines[section_line - 1] if section_line <= len(lines) else ""
+                    }
+        
+        # Try to find text pattern to match
+        # Look for quoted text or specific phrases
+        text_patterns = [
+            r"(?:after|before|replace)\s+['\"]([^'\"]+)['\"]",
+            r"(?:after|before|replace)\s+([A-Z][^\.]+)",
+        ]
+        for pattern in text_patterns:
+            match = re.search(pattern, user_input, re.IGNORECASE)
+            if match:
+                match_text = match.group(1).strip()
+                # Find in file
+                for i, line in enumerate(lines):
+                    if match_text.lower() in line.lower():
+                        # Determine edit type
+                        if "after" in user_lower:
+                            edit_type = "insert_after"
+                        elif "before" in user_lower:
+                            edit_type = "insert_before"
+                        else:
+                            edit_type = "replace"
+                        
+                        return {
+                            "type": edit_type,
+                            "line_number": i + 1,
+                            "description": f"text '{match_text[:50]}...' (line {i + 1})",
+                            "match_text": line
+                        }
+        
+        return None
+    
+    def _apply_targeted_edit(self, file_path: str, original_content: str, new_content: str, edit_location: Dict) -> str:
+        """
+        Apply targeted edit to file content
+        
+        Args:
+            file_path: Path to file
+            original_content: Original file content
+            new_content: New content to insert/replace
+            edit_location: Location dict from _parse_edit_location
+            
+        Returns:
+            Updated file content
+        """
+        lines = original_content.split('\n')
+        line_number = edit_location.get("line_number")
+        edit_type = edit_location.get("type", "replace")
+        
+        if not line_number or line_number < 1 or line_number > len(lines):
+            print(f"DEBUG [EDIT ERROR]: Invalid line number {line_number}")
+            return original_content
+        
+        # Clean new_content (remove markdown code blocks if present)
+        if "```asciidoc" in new_content:
+            new_content = new_content.split("```asciidoc")[1].split("```")[0].strip()
+        elif "```" in new_content:
+            new_content = new_content.split("```")[1].split("```")[0].strip()
+        
+        # Split new content into lines
+        new_lines = new_content.split('\n')
+        
+        if edit_type == "insert_after":
+            # Insert after the specified line
+            updated_lines = lines[:line_number] + new_lines + lines[line_number:]
+        elif edit_type == "insert_before":
+            # Insert before the specified line (line_number - 1)
+            updated_lines = lines[:line_number - 1] + new_lines + lines[line_number - 1:]
+        else:  # replace
+            # Replace the line(s) - for now, replace just the one line
+            # Could be enhanced to replace multiple lines or sections
+            updated_lines = lines[:line_number - 1] + new_lines + lines[line_number:]
+        
+        return '\n'.join(updated_lines)
+    
+    def _write_file_with_backup(self, file_path: str, content: str) -> bool:
+        """
+        Write content to file with backup
+        
+        Args:
+            file_path: Path to file
+            content: Content to write
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            # Check if file exists and get permissions
+            file_exists = os.path.exists(file_path)
+            if file_exists:
+                # Check if file is writable
+                if not os.access(file_path, os.W_OK):
+                    print(f"DEBUG [WRITE ERROR]: File exists but is not writable: {file_path}")
+                    print(f"DEBUG [WRITE ERROR]: File permissions: {oct(os.stat(file_path).st_mode)}")
+                    return False
+                
+                # Check directory permissions
+                file_dir = os.path.dirname(file_path)
+                if not os.access(file_dir, os.W_OK):
+                    print(f"DEBUG [WRITE ERROR]: Directory is not writable: {file_dir}")
+                    print(f"DEBUG [WRITE ERROR]: Directory permissions: {oct(os.stat(file_dir).st_mode)}")
+                    return False
+                
+                # Create backup
+                backup_path = f"{file_path}.backup.{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                try:
+                    shutil.copy2(file_path, backup_path)
+                    print(f"DEBUG [BACKUP]: Created backup at {backup_path}")
+                except Exception as backup_error:
+                    print(f"DEBUG [BACKUP WARNING]: Could not create backup: {backup_error}")
+                    # Continue anyway - backup failure shouldn't prevent write
+            else:
+                # File doesn't exist - check if directory is writable
+                file_dir = os.path.dirname(file_path) or "."
+                if not os.path.exists(file_dir):
+                    try:
+                        os.makedirs(file_dir, exist_ok=True)
+                        print(f"DEBUG [WRITE]: Created directory: {file_dir}")
+                    except Exception as dir_error:
+                        print(f"DEBUG [WRITE ERROR]: Could not create directory: {dir_error}")
+                        return False
+                
+                if not os.access(file_dir, os.W_OK):
+                    print(f"DEBUG [WRITE ERROR]: Directory is not writable: {file_dir}")
+                    return False
+            
+            # Write new content
+            print(f"DEBUG [WRITE]: Attempting to write {len(content)} characters to {file_path}")
+            print(f"DEBUG [WRITE]: File exists: {file_exists}, File path: {os.path.abspath(file_path)}")
+            
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.write(content)
+            
+            # Verify write succeeded
+            if os.path.exists(file_path):
+                written_size = os.path.getsize(file_path)
+                print(f"DEBUG [WRITE]: Successfully wrote {len(content)} characters to {file_path}")
+                print(f"DEBUG [WRITE]: File size after write: {written_size} bytes")
+                
+                # Read back to verify
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    read_back = f.read()
+                if read_back == content:
+                    print(f"DEBUG [WRITE]: Verified - file content matches written content")
+                    return True
+                else:
+                    print(f"DEBUG [WRITE ERROR]: File content mismatch! Written: {len(content)}, Read: {len(read_back)}")
+                    print(f"DEBUG [WRITE ERROR]: First 100 chars written: {content[:100]}")
+                    print(f"DEBUG [WRITE ERROR]: First 100 chars read: {read_back[:100]}")
+                    return False
+            else:
+                print(f"DEBUG [WRITE ERROR]: File does not exist after write attempt!")
+                return False
+                
+        except PermissionError as e:
+            print(f"DEBUG [WRITE ERROR]: Permission denied: {e}")
+            print(f"DEBUG [WRITE ERROR]: File: {file_path}")
+            print(f"DEBUG [WRITE ERROR]: Current user: {os.getenv('USER', 'unknown')}")
+            print(f"DEBUG [WRITE ERROR]: File owner (if exists): {os.stat(file_path).st_uid if os.path.exists(file_path) else 'N/A'}")
+            import traceback
+            traceback.print_exc()
+            return False
+        except Exception as e:
+            print(f"DEBUG [WRITE ERROR]: Failed to write file: {e}")
+            print(f"DEBUG [WRITE ERROR]: File path: {file_path}")
+            print(f"DEBUG [WRITE ERROR]: Error type: {type(e).__name__}")
+            import traceback
+            traceback.print_exc()
+            return False
+    
+    def _extract_file_content_from_response(self, response: str) -> Optional[str]:
+        """
+        Extract file content from LLM response, removing explanatory text and thinking process
+        
+        Looks for AsciiDoc code blocks or complete file content, and removes
+        any explanatory text before/after the actual content.
+        """
+        if not response or not response.strip():
+            print(f"DEBUG [EXTRACT]: Response is empty")
+            return None
+        
+        print(f"DEBUG [EXTRACT]: Attempting to extract content from response (length: {len(response)})")
+        print(f"DEBUG [EXTRACT]: Response preview (first 500 chars):\n{response[:500]}")
+        
+        # Try to extract from code blocks first (most reliable)
+        if "```asciidoc" in response:
+            print(f"DEBUG [EXTRACT]: Found ```asciidoc code block")
+            parts = response.split("```asciidoc")
+            if len(parts) >= 2:
+                content = parts[1].split("```")[0].strip()
+                if content:
+                    print(f"DEBUG [EXTRACT]: Extracted {len(content)} characters from asciidoc block")
+                    return content
+        
+        # Try any code block (without language specified)
+        if "```" in response:
+            print(f"DEBUG [EXTRACT]: Found ``` code block(s)")
+            parts = response.split("```")
+            if len(parts) >= 3:
+                # Try each code block (every odd index after first is code content)
+                for i in range(1, len(parts), 2):
+                    if i < len(parts):
+                        content = parts[i].strip()
+                        # Skip language identifier if present (first line that's not AsciiDoc)
+                        lines = content.split('\n')
+                        if lines and len(lines) > 1:
+                            first_line = lines[0].strip()
+                            # If first line doesn't look like AsciiDoc, it might be language identifier
+                            if not (first_line.startswith('=') or first_line.startswith('[') or first_line.startswith(':') or first_line == ''):
+                                # Skip first line (language identifier)
+                                content = '\n'.join(lines[1:]).strip()
+                        
+                        # Check if it looks like AsciiDoc
+                        if "==" in content or "[source" in content or "[subs=" in content or ":toc:" in content or ":sectnums:" in content:
+                            print(f"DEBUG [EXTRACT]: Extracted {len(content)} characters from code block (looks like AsciiDoc)")
+                            return content
+                        elif len(content) > 100:  # If it's substantial content, might be the file
+                            print(f"DEBUG [EXTRACT]: Extracted {len(content)} characters from code block (substantial content)")
+                            return content
+        
+        # If no code blocks, try to find the actual content by removing explanatory text
+        # Look for patterns that indicate the start of actual content
+        content_start_markers = [
+            r'^=+\s+',  # AsciiDoc heading at start of line
+            r'^:toc:',  # AsciiDoc attribute
+            r'^:sectnums:',  # AsciiDoc attribute
+            r'^\[source',  # Source block
+            r'^\[subs=',  # Subs block
+        ]
+        
+        lines = response.split('\n')
+        content_start_idx = 0
+        content_end_idx = len(lines)
+        
+        # Find where actual content starts (skip explanatory text)
+        for i, line in enumerate(lines):
+            line_stripped = line.strip()
+            # Check if this line looks like the start of AsciiDoc content
+            for pattern in content_start_markers:
+                if re.match(pattern, line_stripped, re.IGNORECASE):
+                    content_start_idx = i
+                    print(f"DEBUG [EXTRACT]: Found content start at line {i+1}: {line_stripped[:50]}")
+                    break
+            if content_start_idx > 0:
+                break
+        
+        # Find where content ends (look for explanatory text after content)
+        explanatory_end_markers = [
+            r'^(here|i\'ve|the file|let me|hope this|if you need)',
+            r'^(note|remember|important):',
+            r'^---+$',  # Separator line
+        ]
+        
+        # Work backwards from end to find where explanatory text starts
+        for i in range(len(lines) - 1, content_start_idx, -1):
+            line_stripped = lines[i].strip().lower()
+            # If line is empty or very short, might be separator
+            if not line_stripped or len(line_stripped) < 3:
+                continue
+            # Check if this looks like explanatory text
+            is_explanatory = False
+            for pattern in explanatory_end_markers:
+                if re.match(pattern, line_stripped, re.IGNORECASE):
+                    is_explanatory = True
+                    break
+            # Also check if line doesn't look like AsciiDoc
+            if not is_explanatory:
+                if not (line_stripped.startswith('=') or line_stripped.startswith('[') or 
+                       line_stripped.startswith(':') or line_stripped.startswith('<') or
+                       '----' in line_stripped or '++++' in line_stripped):
+                    # Might be explanatory text
+                    if len(line_stripped) < 100:  # Short lines are more likely to be explanations
+                        is_explanatory = True
+            
+            if is_explanatory:
+                content_end_idx = i
+                print(f"DEBUG [EXTRACT]: Found potential content end at line {i+1}: {line_stripped[:50]}")
+            else:
+                # Found actual content, stop looking
+                break
+        
+        # Extract the content section
+        if content_start_idx < content_end_idx:
+            content_lines = lines[content_start_idx:content_end_idx]
+            content = '\n'.join(content_lines).strip()
+            
+            # Verify it looks like AsciiDoc content
+            asciidoc_markers = ["==", "[source", "[subs=", ":toc:", ":sectnums:", "[NOTE]", "[TIP]", "[WARNING]", "[IMPORTANT]"]
+            has_markers = any(marker in content for marker in asciidoc_markers)
+            
+            if has_markers and len(content) > 50:
+                print(f"DEBUG [EXTRACT]: Extracted {len(content)} characters from lines {content_start_idx+1}-{content_end_idx} (contains AsciiDoc markers)")
+                return content
+        
+        # Fallback: if entire response has AsciiDoc markers, use it but try to clean it
+        asciidoc_markers = ["==", "[source", "[subs=", ":toc:", ":sectnums:", "[NOTE]", "[TIP]", "[WARNING]", "[IMPORTANT]"]
+        has_markers = any(marker in response for marker in asciidoc_markers)
+        if has_markers:
+            print(f"DEBUG [EXTRACT]: Entire response contains AsciiDoc markers, cleaning and using")
+            # Try to remove common explanatory prefixes/suffixes
+            cleaned = self._clean_explanatory_text(response)
+            return cleaned.strip()
+        
+        print(f"DEBUG [EXTRACT]: Could not extract file content - response doesn't match expected formats")
+        print(f"DEBUG [EXTRACT]: Response starts with: {response[:200]}")
+        print(f"DEBUG [EXTRACT]: Response ends with: {response[-200:]}")
+        return None
+    
+    def _clean_explanatory_text(self, text: str) -> str:
+        """
+        Remove common explanatory text patterns from LLM response
+        
+        Removes thinking process, explanations, and other non-content text
+        """
+        if not text:
+            return text
+        
+        lines = text.split('\n')
+        cleaned_lines = []
+        skip_until_content = True
+        in_content = False
+        
+        # Patterns that indicate explanatory text (to skip)
+        explanatory_patterns = [
+            r'^(here|i\'ve|the file|let me|i\'ll|i can|i will|to add|to insert|to replace|i need|i should)',
+            r'^(note|remember|important|please note|keep in mind):',
+            r'^(this|that|these|those)\s+(is|are|will|should|can|might)',
+            r'^you can',
+            r'^the content',
+            r'^the updated',
+            r'^as you can see',
+            r'^in this',
+            r'^this will',
+            r'^make sure',
+        ]
+        
+        # Patterns that indicate actual content starts
+        content_start_patterns = [
+            r'^=+\s+',  # Heading
+            r'^:toc:',  # Attribute
+            r'^\[source',  # Source block
+            r'^\[subs=',  # Subs block
+            r'^\[NOTE\]',  # Admonition
+            r'^----$',  # Block delimiter
+        ]
+        
+        # Patterns that indicate thinking/explanation (always skip)
+        thinking_patterns = [
+            r'^<think>',
+            r'^</think>',
+            r'^thinking:',
+            r'^let me think',
+            r'^i think',
+            r'^i believe',
+        ]
+        
+        for i, line in enumerate(lines):
+            line_stripped = line.strip()
+            
+            # Always skip thinking tags
+            is_thinking = False
+            for pattern in thinking_patterns:
+                if re.match(pattern, line_stripped, re.IGNORECASE):
+                    is_thinking = True
+                    break
+            if is_thinking:
+                continue
+            
+            # Skip empty lines at the start
+            if skip_until_content and not line_stripped:
+                continue
+            
+            # Check if this looks like content start
+            is_content_start = False
+            for pattern in content_start_patterns:
+                if re.match(pattern, line_stripped, re.IGNORECASE):
+                    is_content_start = True
+                    skip_until_content = False
+                    in_content = True
+                    break
+            
+            if is_content_start:
+                cleaned_lines.append(line)
+                skip_until_content = False
+                in_content = True
+            elif skip_until_content:
+                # Still in explanatory section, check if this is explanatory
+                is_explanatory = False
+                for pattern in explanatory_patterns:
+                    if re.match(pattern, line_stripped, re.IGNORECASE):
+                        is_explanatory = True
+                        break
+                
+                # If it's not clearly explanatory and has content-like structure, start including
+                if not is_explanatory and (line_stripped.startswith('=') or line_stripped.startswith('[') or 
+                                          line_stripped.startswith(':') or line_stripped.startswith('<') or
+                                          '----' in line_stripped or len(line_stripped) > 50):
+                    skip_until_content = False
+                    in_content = True
+                    cleaned_lines.append(line)
+            elif in_content:
+                # We're in content section
+                # Check if we've hit explanatory text at the end
+                is_explanatory = False
+                for pattern in explanatory_patterns:
+                    if re.match(pattern, line_stripped, re.IGNORECASE):
+                        is_explanatory = True
+                        break
+                
+                # Also check if line doesn't look like AsciiDoc content
+                looks_like_content = (
+                    line_stripped.startswith('=') or 
+                    line_stripped.startswith('[') or 
+                    line_stripped.startswith(':') or 
+                    line_stripped.startswith('<') or
+                    '----' in line_stripped or
+                    '++++' in line_stripped or
+                    not line_stripped or  # Empty line is fine
+                    len(line_stripped) > 80  # Long lines are likely content
+                )
+                
+                # If it's explanatory text and doesn't look like content, might be ending
+                if is_explanatory and not looks_like_content:
+                    # Check if we have substantial content already
+                    current_content = '\n'.join(cleaned_lines)
+                    if len(current_content) > 200:
+                        # Probably hit the end, stop here
+                        print(f"DEBUG [CLEAN]: Stopping at line {i+1} (explanatory text after content): {line_stripped[:50]}")
+                        break
+                
+                # Include the line if it looks like content or we're still in content section
+                if looks_like_content or not is_explanatory:
+                    cleaned_lines.append(line)
+                elif is_explanatory:
+                    # Hit explanatory text, but check if there's more content after
+                    # Look ahead a few lines
+                    has_more_content = False
+                    for j in range(i + 1, min(i + 5, len(lines))):
+                        ahead_line = lines[j].strip()
+                        if ahead_line and (ahead_line.startswith('=') or ahead_line.startswith('[') or 
+                                         ahead_line.startswith(':') or '----' in ahead_line):
+                            has_more_content = True
+                            break
+                    
+                    if has_more_content:
+                        # More content coming, include this line
+                        cleaned_lines.append(line)
+                    else:
+                        # Probably the end
+                        break
+        
+        result = '\n'.join(cleaned_lines).strip()
+        print(f"DEBUG [CLEAN]: Cleaned text: {len(text)} -> {len(result)} characters")
+        return result
     
     def _load_rag_data(self, sona_path: Optional[str] = None) -> Optional[Dict]:
         """Load RAG data from file specified in persona config, including referenced files"""
